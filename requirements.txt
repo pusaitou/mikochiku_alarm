@@ -1,0 +1,5 @@
+requests
+pygame
+bs4
+PyQt5
+pyinstaller
