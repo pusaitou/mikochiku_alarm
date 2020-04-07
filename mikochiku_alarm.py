@@ -33,7 +33,7 @@ class MikochikuAlarm(QWidget):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_live)
-        self.timer.setInterval(5000)
+        self.timer.setInterval(000)
         self.timer.start()
 
         label = QLabel(self)
