@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import locale
 import sys
 import os
 import time
@@ -9,7 +10,10 @@ import pygame.mixer
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QTranslator, qDebug
+
+# for translations
+import resource
 
 
 PY3 = sys.version_info[0] == 3
@@ -25,6 +29,14 @@ class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
+
+        self.trans = QTranslator(self)
+        _lang = locale.getdefaultlocale()[0]
+        if _lang != 'ja_JP':
+            self.trans.load(':/lang/{}.qm'.format(_lang))
+            _app = QApplication.instance()
+            _app.installTranslator(self.trans)
+        
         self.search_ch_id = "UC-hM6YJuNYVAmUWxeIr9FeA"
         self.old_video_id_list = []
         self.initUI()
@@ -40,7 +52,7 @@ class MikochikuAlarm(QWidget):
         label.setPixmap(QPixmap(resource_path("icon.ico")))
         label.move(60,70)
 
-        self.alarm_cb = QCheckBox('配信が始まったらアラームを鳴らす', self)
+        self.alarm_cb = QCheckBox(QApplication.translate('MikochikuAlarm', '配信が始まったらアラームを鳴らす'), self)
         self.alarm_cb.move(20, 20)
         self.alarm_cb.toggle()
         
@@ -49,11 +61,11 @@ class MikochikuAlarm(QWidget):
         # self.loop_cb.move(20, 40)
         # self.loop_cb.toggle()
 
-        self.webbrowser_cb = QCheckBox('配信が始まったら自動でブラウザを開く', self)
+        self.webbrowser_cb = QCheckBox(QApplication.translate('MikochikuAlarm', '配信が始まったら自動でブラウザを開く'), self)
         self.webbrowser_cb.move(20, 40)
         self.webbrowser_cb.toggle()
 
-        self.alarm_stop = QPushButton("待機中", self)
+        self.alarm_stop = QPushButton(QApplication.translate('MikochikuAlarm', "待機中"), self)
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
         self.alarm_stop.move(80, 80)
@@ -61,14 +73,14 @@ class MikochikuAlarm(QWidget):
 
         
         self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle('みこ畜アラーム')
+        self.setWindowTitle(QApplication.translate('MikochikuAlarm', 'みこ畜アラーム'))
 
         self.show()
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
-        print("buff_video_id_set",buff_video_id_set)
-        print("self.old_video_id_list", self.old_video_id_list)
+        qDebug("buff_video_id_set: {}".format(buff_video_id_set))
+        qDebug("self.old_video_id_list: {}".format(self.old_video_id_list))
         if buff_video_id_set:
             for getting_video_id in buff_video_id_set:
                 if not getting_video_id == "" and not getting_video_id is None: 
@@ -76,8 +88,8 @@ class MikochikuAlarm(QWidget):
                         self.old_video_id_list.append(getting_video_id)
                         if len(self.old_video_id_list) > 30:
                             self.old_video_id_list = self.old_video_id_list[1:]
-                        print("")
-                        print("配信が始まりました")
+                        qDebug("")
+                        qDebug(QApplication.translate('MikochikuAlarm', "配信が始まりました"))
                         # self.alarm_stop.setEnabled(False)
                         self.alarm_stop.click()
                         self.alarm_stop.setText("ストップ")
@@ -90,7 +102,7 @@ class MikochikuAlarm(QWidget):
     def stop_alarm(self):
         pygame.mixer.music.stop()
         self.alarm_stop.setEnabled(True)
-        self.alarm_stop.setText("待機中")
+        self.alarm_stop.setText(QApplication.translate('MikochikuAlarm', "待機中"))
 
 
     def alarm_sound(self):
