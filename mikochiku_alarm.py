@@ -33,7 +33,7 @@ class MikochikuAlarm(QWidget):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_live)
-        self.timer.setInterval(40000)
+        self.timer.setInterval(5000)
         self.timer.start()
 
         label = QLabel(self)
@@ -109,11 +109,10 @@ class MikochikuAlarm(QWidget):
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
             html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=headers, timeout=10)
             soup = BeautifulSoup(html.text, 'html.parser')
-
-            for scrp in soup.find_all('script'):
-                if 'window["ytInitialData"]' in scrp.text:
-                    dict_str = scrp.text.split(' = ', 1)[1]
-
+            keyword = 'window["ytInitialData"]'
+            for scrp in soup.find_all("script"):
+                if keyword in str(scrp):
+                    dict_str = str(scrp).split(' = ', 1)[1]
             dict_str = dict_str.replace('false', 'False')
             dict_str = dict_str.replace('true', 'True')
 
