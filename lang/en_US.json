@@ -1,0 +1,8 @@
+{
+    "title"     : "Mikochiku Alarm",
+    "alarm"     : "Automatically sound the alarm",
+    "webbrowser": "Automatically open web browser",
+    "started"   : "Live broadcast has started.",
+    "waiting"   : "waiting",
+    "stop"      : "stop"
+}
