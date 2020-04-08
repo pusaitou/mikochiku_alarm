@@ -57,7 +57,6 @@ class MikochikuAlarm(QWidget):
         # self.loop_cb.move(20, 40)
         # self.loop_cb.toggle()
 
-        # self.webbrowser_cb = QCheckBox('配信が始まったら自動でブラウザを開く', self)
         self.webbrowser_cb = QCheckBox(self.get_text(self.get_locale_json(), "webbrowser"), self)
         self.webbrowser_cb.move(20, 40)
         self.webbrowser_cb.toggle()
@@ -69,7 +68,6 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
         self.setGeometry(300, 300, 250, 150)
-        # self.setWindowTitle('みこ畜アラーム')
         self.setWindowTitle(self.get_text(self.get_locale_json(), "title"))
 
         self.show()
