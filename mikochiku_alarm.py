@@ -7,7 +7,7 @@ import webbrowser
 import requests
 import pygame.mixer
 from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel
+from PyQt5.QtWidgets import QComboBox, QWidget, QCheckBox, QPushButton, QApplication, QLabel
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
@@ -30,6 +30,8 @@ class MikochikuAlarm(QWidget):
         self.initUI()
 
     def initUI(self):      
+
+        self.language = "日本語"
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_live)
@@ -59,11 +61,32 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.move(80, 80)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
-        
+        self.combo = QComboBox(self)
+        self.combo.move(0,130)
+        self.combo.addItems(["日本語","English"])
+        self.combo.activated.connect(self.set_language)
+
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle('みこ畜アラーム')
 
         self.show()
+
+    def set_language(self):
+        if self.combo.currentText() == "日本語":
+            self.language = "日本語"
+            self.alarm_cb.setText("配信が始まったらアラームを鳴らす")
+            self.webbrowser_cb.setText("配信が始まったら自動でブラウザを開く")
+            self.alarm_stop.setText("待機中")
+            self.setWindowTitle('みこ畜アラーム')
+
+        elif self.combo.currentText() == "English":
+            self.language = "English"
+            self.alarm_cb.setText("Play alarm when stream starts")
+            self.webbrowser_cb.setText("Open browser when stream starts")
+            self.alarm_stop.setText("Waiting")
+            self.setWindowTitle("Miko livestream alarm")
+
+        #self.initUI()
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
@@ -80,7 +103,12 @@ class MikochikuAlarm(QWidget):
                         print("配信が始まりました")
                         # self.alarm_stop.setEnabled(False)
                         self.alarm_stop.click()
-                        self.alarm_stop.setText("ストップ")
+
+                        if self.language == "日本語":
+                            self.alarm_stop.setText("ストップ")
+                        elif self.language == "English":
+                            self.alarm_stop.setText("Stop")
+
                         if self.webbrowser_cb.checkState():
                             webbrowser.open("https://www.youtube.com/watch?v=" + getting_video_id)
                         if self.alarm_cb.checkState():
@@ -90,7 +118,11 @@ class MikochikuAlarm(QWidget):
     def stop_alarm(self):
         pygame.mixer.music.stop()
         self.alarm_stop.setEnabled(True)
-        self.alarm_stop.setText("待機中")
+
+        if self.language == "日本語":
+            self.alarm_stop.setText("待機中")
+        elif self.language == "English":
+            self.alarm_stop.setText("Waiting")
 
 
     def alarm_sound(self):
