@@ -7,6 +7,7 @@ import webbrowser
 import requests
 import pygame.mixer
 import json
+import settings
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox
 from PyQt5.QtGui import QIcon, QPixmap
@@ -26,11 +27,11 @@ class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        self.search_ch_id = "UC-hM6YJuNYVAmUWxeIr9FeA"
+        self.search_ch_id = settings.CHID
         self.old_video_id_list = []
         self.initUI()
 
-    def initUI(self):      
+    def initUI(self):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_live)
@@ -38,8 +39,8 @@ class MikochikuAlarm(QWidget):
         self.timer.start()
 
         label = QLabel(self)
-        label.setPixmap(QPixmap(resource_path("icon.ico")))
-        label.move(60,70)
+        label.setPixmap(QPixmap(resource_path(settings.ICON)))
+        label.move(60, 70)
 
         self.language_cmb = QComboBox(self)
         self.language_cmb.move(180, 122)
@@ -49,7 +50,8 @@ class MikochikuAlarm(QWidget):
         self.language_cmb.addItem("English")
         self.language_cmb.currentTextChanged.connect(self.on_combobox_changed)
 
-        self.alarm_cb = QCheckBox(self.get_text(self.get_locale_json(), "alarm"), self)
+        self.alarm_cb = QCheckBox(self.get_text(
+            self.get_locale_json(), "alarm"), self)
         self.alarm_cb.move(20, 20)
         self.alarm_cb.toggle()
 
@@ -57,11 +59,13 @@ class MikochikuAlarm(QWidget):
         # self.loop_cb.move(20, 40)
         # self.loop_cb.toggle()
 
-        self.webbrowser_cb = QCheckBox(self.get_text(self.get_locale_json(), "webbrowser"), self)
+        self.webbrowser_cb = QCheckBox(self.get_text(
+            self.get_locale_json(), "webbrowser"), self)
         self.webbrowser_cb.move(20, 40)
         self.webbrowser_cb.toggle()
 
-        self.alarm_stop = QPushButton(self.get_text(self.get_locale_json(), "waiting"), self)
+        self.alarm_stop = QPushButton(self.get_text(
+            self.get_locale_json(), "waiting"), self)
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
         self.alarm_stop.move(80, 80)
@@ -74,11 +78,11 @@ class MikochikuAlarm(QWidget):
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
-        print("buff_video_id_set",buff_video_id_set)
+        print("buff_video_id_set", buff_video_id_set)
         print("self.old_video_id_list", self.old_video_id_list)
         if buff_video_id_set:
             for getting_video_id in buff_video_id_set:
-                if not getting_video_id == "" and not getting_video_id is None: 
+                if not getting_video_id == "" and not getting_video_id is None:
                     if not getting_video_id in self.old_video_id_list:
                         self.old_video_id_list.append(getting_video_id)
                         if len(self.old_video_id_list) > 30:
@@ -87,18 +91,19 @@ class MikochikuAlarm(QWidget):
                         print(self.get_text(self.get_locale_json(), "started"))
                         # self.alarm_stop.setEnabled(False)
                         self.alarm_stop.click()
-                        self.alarm_stop.setText(self.get_text(self.get_locale_json(), "stop"))
+                        self.alarm_stop.setText(self.get_text(
+                            self.get_locale_json(), "stop"))
                         if self.webbrowser_cb.checkState():
-                            webbrowser.open("https://www.youtube.com/watch?v=" + getting_video_id)
+                            webbrowser.open(
+                                "https://www.youtube.com/watch?v=" + getting_video_id)
                         if self.alarm_cb.checkState():
                             self.alarm_sound()
-
 
     def stop_alarm(self):
         pygame.mixer.music.stop()
         self.alarm_stop.setEnabled(True)
-        self.alarm_stop.setText(self.get_text(self.get_locale_json(), "waiting"))
-
+        self.alarm_stop.setText(self.get_text(
+            self.get_locale_json(), "waiting"))
 
     def alarm_sound(self):
         # loop = 1
@@ -114,7 +119,8 @@ class MikochikuAlarm(QWidget):
             session = requests.Session()
             headers = {
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
-            html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=headers, timeout=10)
+            html = session.get("https://www.youtube.com/channel/" +
+                               search_ch_id, headers=headers, timeout=10)
             soup = BeautifulSoup(html.text, 'html.parser')
             keyword = 'window["ytInitialData"]'
             for scrp in soup.find_all("script"):
@@ -135,17 +141,18 @@ class MikochikuAlarm(QWidget):
                                 for videoRenderer in item.values():
                                     for badge in videoRenderer.get("badges", {}):
                                         if badge.get("metadataBadgeRenderer", {}).get("style", {}) == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                            video_id_set.add(videoRenderer.get("videoId", ""))
+                                            video_id_set.add(
+                                                videoRenderer.get("videoId", ""))
                     elif "channelFeaturedContentRenderer" in itemsection:
                         for item in itemsection.get("channelFeaturedContentRenderer", {}).get("items", {}):
-                            for badge in item.get("videoRenderer",{}).get("badges",{}):
-                                if badge.get("metadataBadgeRenderer",{}).get("style","") == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                    video_id_set.add(item.get("videoRenderer",{}).get("videoId",""))
+                            for badge in item.get("videoRenderer", {}).get("badges", {}):
+                                if badge.get("metadataBadgeRenderer", {}).get("style", "") == "BADGE_STYLE_TYPE_LIVE_NOW":
+                                    video_id_set.add(
+                                        item.get("videoRenderer", {}).get("videoId", ""))
         except:
             return video_id_set
 
         return video_id_set
-
 
     def on_combobox_changed(self):
         self.set_locale(self.get_locale_cmb())
@@ -158,9 +165,12 @@ class MikochikuAlarm(QWidget):
             return dict_json["locale"]
 
     def get_locale_cmb(self):
-        if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
-        elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
-        elif self.language_cmb.currentText() == "English": return "en_US"
+        if self.language_cmb.currentText() == "日本語":
+            return "ja_JP"
+        elif self.language_cmb.currentText() == "中文":
+            return "zh_CN"
+        elif self.language_cmb.currentText() == "English":
+            return "en_US"
 
     def set_locale(self, locale):
         path = ".\\lang\\locale.json"
@@ -194,14 +204,15 @@ def main():
     #             if cnt > 2:
     #                 sys.exit()
     pygame.mixer.init()
-    if os.path.exists("alarm.mp3"):
-        pygame.mixer.music.load("alarm.mp3")
+    if os.path.exists(settings.ALARM):
+        pygame.mixer.music.load(settings.ALARM)
     else:
-        pygame.mixer.music.load(resource_path("alarm.mp3"))
+        pygame.mixer.music.load(resource_path(settings.ALARM))
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(resource_path("icon.ico")))
+    app.setWindowIcon(QIcon(resource_path(settings.ICON)))
     mk = MikochikuAlarm()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
