@@ -28,8 +28,14 @@ class MikochikuAlarm(QWidget):
         QWidget.__init__(self, parent)
         self.search_ch_id = "UC-hM6YJuNYVAmUWxeIr9FeA"
         self.old_video_id_list = []
-        self.initUI()
 
+        # Checks which os is being used then sets the correct path
+        if os.name == "posix":
+            self.language_path = "lang/"
+        elif os.name == "nt":
+            self.language_path = ".\\lang\\"
+
+        self.initUI()
     def initUI(self):      
 
         self.timer = QTimer(self)
@@ -152,7 +158,8 @@ class MikochikuAlarm(QWidget):
         print(self.get_locale_json())
 
     def get_locale_json(self):
-        path = ".\\lang\\locale.json"
+        print("get_local_json(): " + self.language_path+"locale.json")
+        path = self.language_path +"locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             return dict_json["locale"]
@@ -163,7 +170,8 @@ class MikochikuAlarm(QWidget):
         elif self.language_cmb.currentText() == "English": return "en_US"
 
     def set_locale(self, locale):
-        path = ".\\lang\\locale.json"
+        print("ser_local(): " + self.language_path + "locale.json")
+        path = self.language_path + "locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             dict_json["locale"] = locale
@@ -171,7 +179,8 @@ class MikochikuAlarm(QWidget):
             json.dump(dict_json, file)
 
     def get_text(self, locale, content):
-        path = ".\\lang\\" + locale + ".json"
+        print("get_text(): " + self.language_path + locale + ".json")
+        path = self.language_path + locale + ".json"
         with open(path, encoding="UTF-8") as file:
             dict_json = json.load(file)
         print(dict_json[content])
