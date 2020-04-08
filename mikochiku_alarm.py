@@ -158,7 +158,6 @@ class MikochikuAlarm(QWidget):
         print(self.get_locale_json())
 
     def get_locale_json(self):
-        print("get_local_json(): " + self.language_path+"locale.json")
         path = self.language_path +"locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
@@ -170,7 +169,6 @@ class MikochikuAlarm(QWidget):
         elif self.language_cmb.currentText() == "English": return "en_US"
 
     def set_locale(self, locale):
-        print("ser_local(): " + self.language_path + "locale.json")
         path = self.language_path + "locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
@@ -179,7 +177,6 @@ class MikochikuAlarm(QWidget):
             json.dump(dict_json, file)
 
     def get_text(self, locale, content):
-        print("get_text(): " + self.language_path + locale + ".json")
         path = self.language_path + locale + ".json"
         with open(path, encoding="UTF-8") as file:
             dict_json = json.load(file)
