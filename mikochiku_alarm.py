@@ -7,7 +7,7 @@ import webbrowser
 import requests
 import pygame.mixer
 from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QGridLayout, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
@@ -26,6 +26,36 @@ class MikochikuAlarm(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
         self.search_ch_id = "UC-hM6YJuNYVAmUWxeIr9FeA"
+        self.ch_dic = {
+            "ときのそら":"UCp6993wxpyDPHUpavwDFqgg",
+            "AZKi":"UC0TXe_LYZ4scaW2XMyi5_kw",
+            "ロボ子さん":"UCDqI2jOz0weumE8s7paEk6g",
+            "さくらみこ":"UC-hM6YJuNYVAmUWxeIr9FeA",
+            "白上フブキ":"UCdn5BQ06XqgXoAxIhbqw5Rg",
+            "夏色まつり":"UCQ0UDLQCjY0rmuxCDE38FGg",
+            "夜空メル":"UCD8HOxPs4Xvsm8H0ZxXGiBw",
+            "赤井はあと":"UC1CfXB_kRs3C-zaeTG3oGyg",
+            "アキ・ローゼンタール":"UCFTLzh12_nrtzqBPsTCqenA",
+            "湊あくあ":"UC1opHUrw8rvnsadT-iGp7Cg",
+            "癒月ちょこ":"UC1suqwovbL1kzsoaZgFZLKg",
+            "百鬼あやめ":"UC7fk0CB07ly8oSl0aqKkqFg",
+            "紫咲シオン":"UCXTpFs_3PqI41qX2d9tL2Rw",
+            "大空スバル":"UCvzGlP9oQwU--Y0r9id_jnA",
+            "大神ミオ":"UCp-5t9SrOQwXMU7iIjQfARg",
+            "猫又おかゆ":"UCvaTdHTWBGv3MKj3KVqJVCw",
+            "戌神ころね":"UChAnqc_AY5_I3Px5dig3X1Q",
+            "不知火フレア":"UCvInZx9h3jC2JzsIzoOebWg",
+            "白銀ノエル":"UCdyqAaZDKHXg4Ahi7VENThQ",
+            "宝鐘マリン":"UCCzUftO8KOVkV4wQG1vkUvg",
+            "兎田ぺこら":"UC1DCedRgGHBdm81E1llLhOQ",
+            "潤羽るしあ":"UCl_gCybOJRIgOXw6Qb4qJzQ",
+            "星街すいせい":"UC5CwaMl1eIgY8h02uZw7u8A",
+            "天音かなた":"UCZlDXzGoo7d44bwdNObFacg",
+            "桐生ココ":"UCS9uQI-jC3DE0L4IpXyvr6w",
+            "角巻わため":"UCqm3BQLlJfvkTsX_hvm0UmA",
+            "常闇トワ":"UC1uv2Oq6kNxgATlCiez59hw",
+            "姫森ルーナ":"UCa9Y57gfeY0Zro_noHRVrnw"
+            }
         self.old_video_id_list = []
         self.initUI()
 
@@ -56,19 +86,57 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop = QPushButton("待機中", self)
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
-        self.alarm_stop.move(80, 80)
+        self.alarm_stop.move(80, 360)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
-
         
-        self.setGeometry(300, 300, 250, 150)
+        self.listWidget = QListWidget(self)
+        self.listWidget.resize(300,150)
+        self.listWidget.addItem("ときのそら");
+        self.listWidget.addItem("AZKi");
+        self.listWidget.addItem("ロボ子さん");
+        self.listWidget.addItem("さくらみこ");
+        self.listWidget.addItem("白上フブキ");
+        self.listWidget.addItem("夏色まつり");
+        self.listWidget.addItem("夜空メル");
+        self.listWidget.addItem("赤井はあと");
+        self.listWidget.addItem("アキ・ローゼンタール");
+        self.listWidget.addItem("湊あくあ");
+        self.listWidget.addItem("癒月ちょこ");
+        self.listWidget.addItem("百鬼あやめ");
+        self.listWidget.addItem("紫咲シオン");
+        self.listWidget.addItem("大空スバル");
+        self.listWidget.addItem("大神ミオ");
+        self.listWidget.addItem("猫又おかゆ");
+        self.listWidget.addItem("戌神ころね");
+        self.listWidget.addItem("不知火フレア");
+        self.listWidget.addItem("白銀ノエル");
+        self.listWidget.addItem("宝鐘マリン");
+        self.listWidget.addItem("兎田ぺこら");
+        self.listWidget.addItem("潤羽るしあ");
+        self.listWidget.addItem("星街すいせい");
+        self.listWidget.addItem("天音かなた");
+        self.listWidget.addItem("桐生ココ");
+        self.listWidget.addItem("角巻わため");
+        self.listWidget.addItem("常闇トワ");
+        self.listWidget.addItem("姫森ルーナ");
+
+        self.listWidget.move(30,200)
+
+        self.listWidget.itemClicked.connect(self.clicked)
+         
+        self.setGeometry(300, 300, 400, 400)
         self.setWindowTitle('みこ畜アラーム')
 
         self.show()
-
+    def clicked(self, qmodelindex):
+        self.search_ch_id = self.ch_dic[self.listWidget.currentItem().text()]
+        
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
-        print("buff_video_id_set",buff_video_id_set)
-        print("self.old_video_id_list", self.old_video_id_list)
+        print(self.listWidget.selectedIndexes())
+        if self.listWidget.selectedIndexes() is None:
+            print("aaaa")
+            self.search_ch_id = ""
         if buff_video_id_set:
             for getting_video_id in buff_video_id_set:
                 if not getting_video_id == "" and not getting_video_id is None: 
