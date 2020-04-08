@@ -6,8 +6,9 @@ import time
 import webbrowser
 import requests
 import pygame.mixer
+import json
 from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
@@ -43,7 +44,6 @@ class MikochikuAlarm(QWidget):
         self.alarm_cb = QCheckBox('配信が始まったらアラームを鳴らす', self)
         self.alarm_cb.move(20, 20)
         self.alarm_cb.toggle()
-        
 
         # self.loop_cb = QCheckBox('アラームをループ再生する', self)
         # self.loop_cb.move(20, 40)
@@ -59,9 +59,17 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.move(80, 80)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
-        
+        self.language_cmb = QComboBox(self)
+        self.language_cmb.move(180, 122)
+        self.language_cmb.addItem("日本語")
+        self.language_cmb.addItem("中文")
+        self.language_cmb.addItem("English")
+        self.language_cmb.currentTextChanged.connect(self.on_combobox_changed)
+
+
         self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle('みこ畜アラーム')
+        # self.setWindowTitle('みこ畜アラーム')
+        self.setWindowTitle(self.get_text(self.get_locale(), "title"))
 
         self.show()
 
@@ -138,6 +146,32 @@ class MikochikuAlarm(QWidget):
             return video_id_set
         
         return video_id_set
+
+
+    def on_combobox_changed(self):
+        self.hide()
+        self.show()
+        self.set_locale(self.get_locale())
+        print(self.get_locale())
+
+    def get_locale(self):
+        if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
+        elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
+        elif self.language_cmb.currentText() == "English": return "en_US"
+
+    def set_locale(self, locale):
+        path = ".\\information.json"
+        with open(path) as file:
+            dict_json = json.load(file)
+            dict_json["locale"] = locale
+            file = json.dump(dict_json)
+
+    def get_text(self, locale, content):
+        path = ".\\lang\\" + locale + ".json"
+        with open(path, encoding="UTF-8") as file:
+            dict_json = json.load(file)
+        print(dict_json[content])
+        return dict_json[content]
 
 
 def resource_path(relative):
