@@ -7,6 +7,7 @@ import webbrowser
 import requests
 import pygame.mixer
 import json
+import settings
 from bs4 import BeautifulSoup
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox, QGridLayout, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
@@ -26,7 +27,7 @@ class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
-        self.search_ch_id = "UC-hM6YJuNYVAmUWxeIr9FeA"
+        self.search_ch_id = settings.CHID
         self.old_video_id_list = []
         self.initUI()
 
@@ -38,7 +39,7 @@ class MikochikuAlarm(QWidget):
         self.timer.start()
 
         label = QLabel(self)
-        label.setPixmap(QPixmap(resource_path("icon.ico")))
+        label.setPixmap(QPixmap(resource_path(settings.ICON)))
         label.move(60, 70)
 
         self.language_cmb = QComboBox(self)
@@ -212,12 +213,13 @@ def main():
     #             if cnt > 2:
     #                 sys.exit()
     pygame.mixer.init()
-    if os.path.exists("alarm.mp3"):
-        pygame.mixer.music.load("alarm.mp3")
+    if os.path.exists(
+      .ALARM):
+        pygame.mixer.music.load(settings.ALARM)
     else:
-        pygame.mixer.music.load(resource_path("alarm.mp3"))
+        pygame.mixer.music.load(resource_path(settings.ALARM))
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(resource_path("icon.ico")))
+    app.setWindowIcon(QIcon(resource_path(settings.ICON)))
     mk = MikochikuAlarm()
     sys.exit(app.exec_())
 
