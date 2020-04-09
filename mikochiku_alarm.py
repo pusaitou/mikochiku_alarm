@@ -9,7 +9,7 @@ import pygame.mixer
 import json
 import settings
 from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox, QGridLayout, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
@@ -73,6 +73,15 @@ class MikochikuAlarm(QWidget):
 
         self.setGeometry(300, 300, 250, 150)
         self.setWindowTitle(self.get_text(self.get_locale_json(), "title"))
+        self.listWidget = QListWidget(self)
+
+        # メンバー名をlistWidgetに格納
+        for v in self.member.values():
+            self.listWidget.addItem(v['name'])
+
+        self.listWidget.move(30, 200)
+
+        self.listWidget.itemClicked.connect(self.clicked)
 
         self.show()
 
@@ -204,7 +213,8 @@ def main():
     #             if cnt > 2:
     #                 sys.exit()
     pygame.mixer.init()
-    if os.path.exists(settings.ALARM):
+    if os.path.exists(
+      .ALARM):
         pygame.mixer.music.load(settings.ALARM)
     else:
         pygame.mixer.music.load(resource_path(settings.ALARM))
