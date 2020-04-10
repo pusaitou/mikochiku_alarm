@@ -92,10 +92,6 @@ class MikochikuAlarm(QWidget):
 
         self.show()
 
-    def cfg_dialog(self):
-        dialog = configuration_tab.ConfigurationTab(self)
-        self.dialogs.append(dialog)
-
     # FIXME: 関数名が抽象的すぎる
     def clicked(self, qmodelindex):
         # 要素番号使うのでcurrentRow()に変更
