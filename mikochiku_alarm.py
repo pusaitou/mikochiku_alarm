@@ -52,9 +52,7 @@ class MikochikuAlarm(QWidget):
         self.language_cmb = QComboBox(self)
         self.language_cmb.move(180, 122)
         self.language_cmb.addItem("language")
-        self.language_cmb.addItem("日本語")
-        self.language_cmb.addItem("中文")
-        self.language_cmb.addItem("English")
+        self.language_cmb.addItem(["日本語", "中文", "English"])
         self.language_cmb.currentTextChanged.connect(self.on_combobox_changed)
 
         self.alarm_cb = QCheckBox(self.get_text(
@@ -135,8 +133,7 @@ class MikochikuAlarm(QWidget):
             session = requests.Session()
             headers = {
                 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
-            html = session.get("https://www.youtube.com/channel/" +
-                               search_ch_id, headers=headers, timeout=10)
+            html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=headers, timeout=10)
             soup = BeautifulSoup(html.text, 'html.parser')
             keyword = 'window["ytInitialData"]'
             for scrp in soup.find_all("script"):
@@ -181,12 +178,9 @@ class MikochikuAlarm(QWidget):
             return dict_json["locale"]
 
     def get_locale_cmb(self):
-        if self.language_cmb.currentText() == "日本語":
-            return "ja_JP"
-        elif self.language_cmb.currentText() == "中文":
-            return "zh_CN"
-        elif self.language_cmb.currentText() == "English":
-            return "en_US"
+        if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
+        elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
+        elif self.language_cmb.currentText() == "English": return "en_US"
 
     def set_locale(self, locale):
         path = self.language_path + "locale.json"
@@ -220,8 +214,7 @@ def main():
     #             if cnt > 2:
     #                 sys.exit()
     pygame.mixer.init()
-    if os.path.exists(
-      .ALARM):
+    if os.path.exists(settings.ALARM):
         pygame.mixer.music.load(settings.ALARM)
     else:
         pygame.mixer.music.load(resource_path(settings.ALARM))
