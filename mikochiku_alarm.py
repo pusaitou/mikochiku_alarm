@@ -92,11 +92,15 @@ class MikochikuAlarm(QWidget):
 
         self.show()
 
+    def cfg_dialog(self):
+        dialog = configuration_tab.ConfigurationTab(self)
+        self.dialogs.append(dialog)
+
     # FIXME: 関数名が抽象的すぎる
     def clicked(self, qmodelindex):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
-        self.search_ch_id = member['channnel_id']
+        self.search_ch_id = member['channel_id']
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
