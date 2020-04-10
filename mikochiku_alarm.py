@@ -30,6 +30,9 @@ class MikochikuAlarm(QWidget):
         self.search_ch_id = settings.CHID
         self.old_video_id_list = []
 
+        # メンバー一覧のjsonを取得し、memberに格納
+        with open("holo_member.json", encoding="UTF-8") as file:
+                self.member = json.load(file)
 
         # Checks which os is being used then sets the correct path
         if os.name == "posix":
@@ -52,7 +55,7 @@ class MikochikuAlarm(QWidget):
         self.language_cmb = QComboBox(self)
         self.language_cmb.move(180, 122)
         self.language_cmb.addItem("language")
-        self.language_cmb.addItem(["日本語", "中文", "English"])
+        self.language_cmb.addItems(["日本語", "中文", "English"])
         self.language_cmb.currentTextChanged.connect(self.on_combobox_changed)
 
         self.alarm_cb = QCheckBox(self.get_text(
@@ -81,14 +84,17 @@ class MikochikuAlarm(QWidget):
         self.listWidget = QListWidget(self)
 
         # メンバー名をlistWidgetに格納
-        for v in self.member.values():
+        for v in self.member:
             self.listWidget.addItem(v['name'])
-
         self.listWidget.move(30, 200)
-
         self.listWidget.itemClicked.connect(self.clicked)
 
         self.show()
+
+    def clicked(self, qmodelindex):
+        # 要素番号使うのでcurrentRow()に変更
+        member = self.member[self.listWidget.currentRow()]
+        self.search_ch_id = member['channnel_id']
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
