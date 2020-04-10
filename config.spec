@@ -20,6 +20,8 @@ pyz = PYZ(a.pure, a.zipped_data,
 
 a.datas += [('icon.ico', '.\\icon.ico', 'DATA')]
 a.datas += [('alarm.mp3', '.\\alarm.mp3', 'DATA')]
+a.datas += [('lang', '.\\lang', 'DATA')]
+
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
