@@ -32,7 +32,7 @@ class MikochikuAlarm(QWidget):
 
         # メンバー一覧のjsonを取得し、memberに格納
         with open("holo_member.json", encoding="UTF-8") as file:
-                self.member = json.load(file)
+            self.member = json.load(file)
 
         # Checks which os is being used then sets the correct path
         if os.name == "posix":
