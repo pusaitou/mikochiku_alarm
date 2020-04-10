@@ -41,7 +41,8 @@ class MikochikuAlarm(QWidget):
             self.language_path = ".\\lang\\"
 
         self.initUI()
-    def initUI(self):      
+
+    def initUI(self):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.check_live)
@@ -91,6 +92,7 @@ class MikochikuAlarm(QWidget):
 
         self.show()
 
+    # FIXME: 関数名が抽象的すぎる
     def clicked(self, qmodelindex):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
