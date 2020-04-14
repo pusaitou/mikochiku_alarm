@@ -8,8 +8,9 @@ import requests
 import pygame.mixer
 import json
 import settings
+import config_tab
 from bs4 import BeautifulSoup
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QComboBox, QGridLayout, QListWidget
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 
@@ -26,19 +27,17 @@ else:
 class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
-        QWidget.__init__(self, parent)
+        super(MikochikuAlarm, self).__init__(parent)
         self.search_ch_id = settings.CHID
         self.old_video_id_list = []
 
         # メンバー一覧のjsonを取得し、memberに格納
-        with open("holo_member.json", encoding="UTF-8") as file:
+        with open(".\\channel\\hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
 
         # Checks which os is being used then sets the correct path
-        if os.name == "posix":
-            self.language_path = "lang/"
-        elif os.name == "nt":
-            self.language_path = ".\\lang\\"
+        if   os.name == "posix": self.lang_path = "lang/"
+        elif os.name == "nt"   : self.lang_path = ".\\lang\\"
 
         self.initUI()
 
@@ -49,42 +48,40 @@ class MikochikuAlarm(QWidget):
         self.timer.setInterval(40000)
         self.timer.start()
 
-        label = QLabel(self)
-        label.setPixmap(QPixmap(resource_path(settings.ICON)))
-        label.move(60, 70)
+        sakura_miko = QLabel(self)
+        sakura_miko.setPixmap(QPixmap(resource_path(settings.ICON)))
+        sakura_miko.move(65, 70)
 
-        self.language_cmb = QComboBox(self)
-        self.language_cmb.move(180, 122)
-        self.language_cmb.addItem("language")
-        self.language_cmb.addItems(["日本語", "中文", "English"])
-        self.language_cmb.currentTextChanged.connect(self.on_combobox_changed)
-
-        self.alarm_cb = QCheckBox(self.get_text(
-            self.get_locale_json(), "alarm"), self)
-        self.alarm_cb.move(20, 20)
+        self.alarm_cb = QCheckBox(self.localized_text("alarm"), self)
         self.alarm_cb.toggle()
 
         # self.loop_cb = QCheckBox('アラームをループ再生する', self)
         # self.loop_cb.move(20, 40)
         # self.loop_cb.toggle()
 
-        self.webbrowser_cb = QCheckBox(self.get_text(
-            self.get_locale_json(), "webbrowser"), self)
-        self.webbrowser_cb.move(20, 40)
+        self.webbrowser_cb = QCheckBox(self.localized_text("webbrowser"), self)
         self.webbrowser_cb.toggle()
 
-        self.alarm_stop = QPushButton(self.get_text(
-            self.get_locale_json(), "waiting"), self)
+        self.alarm_stop = QPushButton(self.localized_text("waiting"), self)
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
-        self.alarm_stop.move(80, 80)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
-        self.setGeometry(300, 300, 250, 150)
-        self.setWindowTitle(self.get_text(self.get_locale_json(), "title"))
-        self.listWidget = QListWidget(self)
+        self.config_btn = QPushButton("config", self)
+        self.config_btn.clicked.connect(self.cfg_dialog)
+        self.dialogs = list()
+
+        # setGeometry
+        self.alarm_cb     .setGeometry( 10,  10, 250, 20)
+        self.webbrowser_cb.setGeometry( 10,  30, 250, 20)
+        self.alarm_stop   .setGeometry( 80,  80,  80, 25)
+        self.config_btn   .setGeometry(195, 120,  60, 25)
+
+        self.setGeometry(300, 300, 260, 150)
+        self.setWindowTitle(self.localized_text("title"))
 
         # メンバー名をlistWidgetに格納
+        self.listWidget = QListWidget(self)
         for v in self.member:
             self.listWidget.addItem(v['name'])
         self.listWidget.move(30, 200)
@@ -92,8 +89,12 @@ class MikochikuAlarm(QWidget):
 
         self.show()
 
+    def cfg_dialog(self):
+        dialog = config_tab.ConfigTab(self)
+        self.dialogs.append(dialog)
+
     # FIXME: 関数名が抽象的すぎる
-    def clicked(self, qmodelindex):
+    def clicked(self, qmode8ndex):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
@@ -124,8 +125,7 @@ class MikochikuAlarm(QWidget):
     def stop_alarm(self):
         pygame.mixer.music.stop()
         self.alarm_stop.setEnabled(True)
-        self.alarm_stop.setText(self.get_text(
-            self.get_locale_json(), "waiting"))
+        self.alarm_stop.setText(self.localized_text("waiting"))
 
     def alarm_sound(self):
         # loop = 1
@@ -175,34 +175,16 @@ class MikochikuAlarm(QWidget):
 
         return video_id_set
 
-    def on_combobox_changed(self):
-        self.set_locale(self.get_locale_cmb())
-        print(self.get_locale_json())
-
-    def get_locale_json(self):
-        path = self.language_path +"locale.json"
+    def load_locale_json(self): # from json file
+        path = self.lang_path +"locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             return dict_json["locale"]
 
-    def get_locale_cmb(self):
-        if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
-        elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
-        elif self.language_cmb.currentText() == "English": return "en_US"
-
-    def set_locale(self, locale):
-        path = self.language_path + "locale.json"
-        with open(path, mode='r') as file:
-            dict_json = json.load(file)
-            dict_json["locale"] = locale
-        with open(path, mode='w') as file:
-            json.dump(dict_json, file)
-
-    def get_text(self, locale, content):
-        path = self.language_path + locale + ".json"
+    def localized_text(self, content):
+        path = self.lang_path + self.load_locale_json() + ".json"
         with open(path, encoding="UTF-8") as file:
             dict_json = json.load(file)
-        print(dict_json[content])
         return dict_json[content]
 
 
