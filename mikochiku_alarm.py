@@ -9,7 +9,7 @@ import pygame.mixer
 import json
 import settings
 import config_tab
-from bs4 import BeautifulSoup
+import re
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
@@ -23,6 +23,13 @@ else:
     from Queue import Queue
     from urllib import urlencode
 
+PATTERN_LIVE_VIDEO  = re.compile(
+    r'window\["ytInitialData"\] = (.*LIVE_NOW.*?"videoId":"([^"]+)".*);')
+
+HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/69.0.3497.100 Safari/537.36'}
 
 class MikochikuAlarm(QWidget):
 
@@ -30,7 +37,6 @@ class MikochikuAlarm(QWidget):
         super(MikochikuAlarm, self).__init__(parent)
         self.search_ch_id = settings.CHID
         self.old_video_id_list = []
-
         # メンバー一覧のjsonを取得し、memberに格納
         with open(".\\channel\\hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
@@ -100,27 +106,37 @@ class MikochikuAlarm(QWidget):
         self.search_ch_id = member['channel_id']
 
     def check_live(self):
-        buff_video_id_set = self.get_live_video_id(self.search_ch_id)
-        print("buff_video_id_set", buff_video_id_set)
+        getting_video_id = self.get_live_video_id(self.search_ch_id)
+        print("getting_video_id", getting_video_id)
         print("self.old_video_id_list", self.old_video_id_list)
-        if buff_video_id_set:
-            for getting_video_id in buff_video_id_set:
-                if not getting_video_id == "" and not getting_video_id is None:
-                    if not getting_video_id in self.old_video_id_list:
-                        self.old_video_id_list.append(getting_video_id)
-                        if len(self.old_video_id_list) > 30:
-                            self.old_video_id_list = self.old_video_id_list[1:]
-                        print("")
-                        print(self.get_text(self.get_locale_json(), "started"))
-                        # self.alarm_stop.setEnabled(False)
-                        self.alarm_stop.click()
-                        self.alarm_stop.setText(self.get_text(
-                            self.get_locale_json(), "stop"))
-                        if self.webbrowser_cb.checkState():
-                            webbrowser.open(
-                                "https://www.youtube.com/watch?v=" + getting_video_id)
-                        if self.alarm_cb.checkState():
-                            self.alarm_sound()
+        if not getting_video_id:
+            return
+        if getting_video_id in self.old_video_id_list:
+            return
+        # A LIVE BROADCAST HAS BEEN FOUND.
+        self.old_video_id_list.append(getting_video_id)
+        if len(self.old_video_id_list) > 30:
+            self.old_video_id_list.pop(0)
+        print("")
+        print(self.get_text(self.get_locale_json(), "started"))
+        self.alarm_stop.setEnabled(False)
+        self.alarm_stop.click()
+        self.alarm_stop.setText(self.get_text(
+            self.get_locale_json(), "stop"))
+        self.alarm_stop.setEnabled(True)
+        if self.webbrowser_cb.checkState():
+            webbrowser.open(
+                "https://www.youtube.com/watch?v=" + getting_video_id)
+        if self.alarm_cb.checkState():
+            self.alarm_sound()
+
+    def get_locale_json(self):
+        '''Not Implemented'''
+        pass
+
+    def get_text(self, locale_json, message):
+        '''temporary  implementation'''
+        return message
 
     def stop_alarm(self):
         pygame.mixer.music.stop()
@@ -135,45 +151,13 @@ class MikochikuAlarm(QWidget):
         pygame.mixer.music.play(loop_count)
 
     def get_live_video_id(self, search_ch_id):
-        dict_str = ""
-        video_id_set = set()
-        try:
-            session = requests.Session()
-            headers = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
-            html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=headers, timeout=10)
-            soup = BeautifulSoup(html.text, 'html.parser')
-            keyword = 'window["ytInitialData"]'
-            for scrp in soup.find_all("script"):
-                if keyword in str(scrp):
-                    dict_str = str(scrp).split(' = ', 1)[1]
-            dict_str = dict_str.replace('false', 'False')
-            dict_str = dict_str.replace('true', 'True')
-
-            index = dict_str.find("\n")
-            dict_str = dict_str[:index-1]
-            dics = eval(dict_str)
-            for section in dics.get("contents", {}).get("twoColumnBrowseResultsRenderer", {}).get("tabs", {})[0].get("tabRenderer", {}).get("content", {}).get("sectionListRenderer", {}).get("contents", {}):
-                for itemsection in section.get("itemSectionRenderer", {}).get("contents", {}):
-                    items = {}
-                    if "shelfRenderer" in itemsection:
-                        for items in itemsection.get("shelfRenderer", {}).get("content", {}).values():
-                            for item in items.get("items", {}):
-                                for videoRenderer in item.values():
-                                    for badge in videoRenderer.get("badges", {}):
-                                        if badge.get("metadataBadgeRenderer", {}).get("style", {}) == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                            video_id_set.add(
-                                                videoRenderer.get("videoId", ""))
-                    elif "channelFeaturedContentRenderer" in itemsection:
-                        for item in itemsection.get("channelFeaturedContentRenderer", {}).get("items", {}):
-                            for badge in item.get("videoRenderer", {}).get("badges", {}):
-                                if badge.get("metadataBadgeRenderer", {}).get("style", "") == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                    video_id_set.add(
-                                        item.get("videoRenderer", {}).get("videoId", ""))
-        except:
-            return video_id_set
-
-        return video_id_set
+        with requests.Session() as session:
+            html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=HEADERS, timeout=10)
+            matching = re.search(PATTERN_LIVE_VIDEO, html.text)
+            if matching:
+                video_id= matching.group(2)
+                return video_id
+            return None
 
     def load_locale_json(self): # from json file
         path = self.lang_path +"locale.json"
