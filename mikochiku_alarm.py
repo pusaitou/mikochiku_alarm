@@ -9,7 +9,10 @@ import pygame.mixer
 import json
 import settings
 import config_tab
-from bs4 import BeautifulSoup
+import re
+from urllib3.util import Retry
+from urllib3.exceptions import MaxRetryError
+from requests.adapters import HTTPAdapter
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
@@ -23,6 +26,14 @@ else:
     from Queue import Queue
     from urllib import urlencode
 
+PATTERN_DATA = re.compile(r'window\["ytInitialData"\] = (.*?);')
+
+PATTERN_LIVE_VIDEO  = re.compile(r'LIVE_NOW.*?"videoId":"([^"]+)"')
+
+HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
+    'AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/69.0.3497.100 Safari/537.36'}
 
 class MikochikuAlarm(QWidget):
 
@@ -30,16 +41,22 @@ class MikochikuAlarm(QWidget):
         super(MikochikuAlarm, self).__init__(parent)
         self.search_ch_id = settings.CHID
         self.old_video_id_list = []
-
+        self.reset_session()
         # メンバー一覧のjsonを取得し、memberに格納
         with open(".\\channel\\hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
-
         # Checks which os is being used then sets the correct path
         if   os.name == "posix": self.lang_path = "lang/"
         elif os.name == "nt"   : self.lang_path = ".\\lang\\"
 
         self.initUI()
+
+    def reset_session(self):
+        self.session = requests.Session()
+        self.retries = Retry(total=3, # リトライ回数
+            backoff_factor=1, # リトライが複数回起こるときに伸ばす時間
+            status_forcelist=[500]) # status_code
+        self.session.mount("https://", HTTPAdapter(max_retries=self.retries))
 
     def initUI(self):
 
@@ -103,24 +120,22 @@ class MikochikuAlarm(QWidget):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
         print("buff_video_id_set", buff_video_id_set)
         print("self.old_video_id_list", self.old_video_id_list)
-        if buff_video_id_set:
-            for getting_video_id in buff_video_id_set:
-                if not getting_video_id == "" and not getting_video_id is None:
-                    if not getting_video_id in self.old_video_id_list:
-                        self.old_video_id_list.append(getting_video_id)
-                        if len(self.old_video_id_list) > 30:
-                            self.old_video_id_list = self.old_video_id_list[1:]
-                        print("")
-                        print(self.get_text(self.get_locale_json(), "started"))
-                        # self.alarm_stop.setEnabled(False)
-                        self.alarm_stop.click()
-                        self.alarm_stop.setText(self.get_text(
-                            self.get_locale_json(), "stop"))
-                        if self.webbrowser_cb.checkState():
-                            webbrowser.open(
-                                "https://www.youtube.com/watch?v=" + getting_video_id)
-                        if self.alarm_cb.checkState():
-                            self.alarm_sound()
+        for getting_video_id in buff_video_id_set:
+            if getting_video_id in self.old_video_id_list:
+                return
+            self.old_video_id_list.append(getting_video_id)
+            if len(self.old_video_id_list) > 30:
+                self.old_video_id_list.pop(0)
+            print("")
+            print(self.localized_text("started"))
+            # self.alarm_stop.setEnabled(False)
+            self.alarm_stop.click()
+            self.alarm_stop.setText(self.localized_text("stop"))
+            if self.webbrowser_cb.checkState():
+                webbrowser.open(
+                    "https://www.youtube.com/watch?v=" + getting_video_id)
+            if self.alarm_cb.checkState():
+                self.alarm_sound()
 
     def stop_alarm(self):
         pygame.mixer.music.stop()
@@ -135,45 +150,34 @@ class MikochikuAlarm(QWidget):
         pygame.mixer.music.play(loop_count)
 
     def get_live_video_id(self, search_ch_id):
-        dict_str = ""
-        video_id_set = set()
+        response = None
         try:
-            session = requests.Session()
-            headers = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
-            html = session.get("https://www.youtube.com/channel/" + search_ch_id, headers=headers, timeout=10)
-            soup = BeautifulSoup(html.text, 'html.parser')
-            keyword = 'window["ytInitialData"]'
-            for scrp in soup.find_all("script"):
-                if keyword in str(scrp):
-                    dict_str = str(scrp).split(' = ', 1)[1]
-            dict_str = dict_str.replace('false', 'False')
-            dict_str = dict_str.replace('true', 'True')
-
-            index = dict_str.find("\n")
-            dict_str = dict_str[:index-1]
-            dics = eval(dict_str)
-            for section in dics.get("contents", {}).get("twoColumnBrowseResultsRenderer", {}).get("tabs", {})[0].get("tabRenderer", {}).get("content", {}).get("sectionListRenderer", {}).get("contents", {}):
-                for itemsection in section.get("itemSectionRenderer", {}).get("contents", {}):
-                    items = {}
-                    if "shelfRenderer" in itemsection:
-                        for items in itemsection.get("shelfRenderer", {}).get("content", {}).values():
-                            for item in items.get("items", {}):
-                                for videoRenderer in item.values():
-                                    for badge in videoRenderer.get("badges", {}):
-                                        if badge.get("metadataBadgeRenderer", {}).get("style", {}) == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                            video_id_set.add(
-                                                videoRenderer.get("videoId", ""))
-                    elif "channelFeaturedContentRenderer" in itemsection:
-                        for item in itemsection.get("channelFeaturedContentRenderer", {}).get("items", {}):
-                            for badge in item.get("videoRenderer", {}).get("badges", {}):
-                                if badge.get("metadataBadgeRenderer", {}).get("style", "") == "BADGE_STYLE_TYPE_LIVE_NOW":
-                                    video_id_set.add(
-                                        item.get("videoRenderer", {}).get("videoId", ""))
-        except:
+            url = "https://www.youtube.com/channel/" + search_ch_id
+            response = self.session.get(url=url, 
+                headers=HEADERS, timeout=(20,10), stream=True)
+            response.raise_for_status()
+            data = re.search(PATTERN_DATA, response.text)
+            # Find first values of `videoId` following EVERY `LIVE NOW`
+            video_ids = re.findall(PATTERN_LIVE_VIDEO, data.group(1))
+            video_id_set = set(video_ids)
             return video_id_set
+        except requests.exceptions.ConnectTimeout as e:
+            print('タイムアウトしました。')
+            # sessionを張り直して継続する。
+            self.session = self.reset_session()
+            return set()
+        except requests.exceptions.RequestException as e:
+            if response.status_code == 404:
+                print(f'{search_ch_id} は、存在しないチャンネルです。')
+            else:
+                raise
+        except Exception as e:
+            raise
+        self.session.close()
+        print("エラーにより終了しました。")
+        exit(0)
 
-        return video_id_set
+
 
     def load_locale_json(self): # from json file
         path = self.lang_path +"locale.json"
