@@ -97,13 +97,18 @@ class ConfigTab(QMainWindow):
         path = self.parent_obj.lang_path + "locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
-            dict_json["locale"] = self.get_locale_cmb()
-        with open(path, mode='w') as file:
-            json.dump(dict_json, file)
+            selected = self.get_locale_cmb()
+        if not selected:
+            pass
+        else:
+            dict_json["locale"] = selected
+            with open(path, mode='w') as file:
+                json.dump(dict_json, file)
+
         self.parent_obj.update_ui_language()
 
     def get_locale_cmb(self):
         if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
         elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
         elif self.language_cmb.currentText() == "English": return "en_US"
-        else : return "ja_JP"
+
