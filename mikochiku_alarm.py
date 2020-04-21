@@ -13,10 +13,10 @@ import re
 from urllib3.util import Retry
 from urllib3.exceptions import MaxRetryError
 from requests.adapters import HTTPAdapter
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
-
+from httpreq import HttpRequest
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -30,18 +30,13 @@ PATTERN_DATA = re.compile(r'window\["ytInitialData"\] = (.*?);')
 
 PATTERN_LIVE_VIDEO  = re.compile(r'LIVE_NOW.*?"videoId":"([^"]+)"')
 
-HEADERS = {
-    'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/69.0.3497.100 Safari/537.36'}
-
 class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
         super(MikochikuAlarm, self).__init__(parent)
         self.search_ch_id = settings.CHID
         self.old_video_id_list = []
-        self.reset_session()
+        self.request = HttpRequest()
         # メンバー一覧のjsonを取得し、memberに格納
         with open(".\\channel\\hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
@@ -50,13 +45,9 @@ class MikochikuAlarm(QWidget):
         elif os.name == "nt"   : self.lang_path = ".\\lang\\"
 
         self.initUI()
+        # 起動直後にチャンネルIDを調べる
+        self.check_live()
 
-    def reset_session(self):
-        self.session = requests.Session()
-        self.retries = Retry(total=3, # リトライ回数
-            backoff_factor=1, # リトライが複数回起こるときに伸ばす時間
-            status_forcelist=[500]) # status_code
-        self.session.mount("https://", HTTPAdapter(max_retries=self.retries))
 
     def initUI(self):
 
@@ -156,31 +147,26 @@ class MikochikuAlarm(QWidget):
         response = None
         try:
             url = "https://www.youtube.com/channel/" + search_ch_id
-            response = self.session.get(url=url, 
-                headers=HEADERS, timeout=(20,10), stream=True)
+            response = self.request.get(url)
             response.raise_for_status()
             data = re.search(PATTERN_DATA, response.text)
             # Find first values of `videoId` following EVERY `LIVE NOW`
             video_ids = re.findall(PATTERN_LIVE_VIDEO, data.group(1))
-            video_id_set = set(video_ids)
-            return video_id_set
+            return set(video_ids)
         except requests.exceptions.ConnectTimeout as e:
             print('タイムアウトしました。')
-            # sessionを張り直して継続する。
-            self.session = self.reset_session()
-            return set()
+            # sessionを取得しなおす。
+            self.request = HttpRequest()
         except requests.exceptions.RequestException as e:
             if response.status_code == 404:
+                # TODO: アラートダイアログをポップアウトさせたい
                 print(f'{search_ch_id} は、存在しないチャンネルです。')
             else:
-                raise
+                print(f'Request Exception:{response.status_code}')
         except Exception as e:
-            raise
-        self.session.close()
-        print("エラーにより終了しました。")
-        exit(0)
-
-
+            print(type(e),str(e))
+        # 例外が起きても空のsetを返して継続する。
+        return set()
 
     def load_locale_json(self): # from json file
         path = self.lang_path +"locale.json"
