@@ -10,6 +10,7 @@ import json
 import settings
 import config_tab
 import re
+import vparser
 from urllib3.util import Retry
 from urllib3.exceptions import MaxRetryError
 from requests.adapters import HTTPAdapter
@@ -17,6 +18,7 @@ from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabe
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 from httpreq import HttpRequest
+
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -144,28 +146,15 @@ class MikochikuAlarm(QWidget):
         pygame.mixer.music.play(loop_count)
 
     def get_live_video_id(self, search_ch_id):
-        response = None
         try:
-            url = "https://www.youtube.com/channel/" + search_ch_id
-            response = self.request.get(url)
-            response.raise_for_status()
-            data = re.search(PATTERN_DATA, response.text)
-            # Find first values of `videoId` following EVERY `LIVE NOW`
-            video_ids = re.findall(PATTERN_LIVE_VIDEO, data.group(1))
+            source = vparser.get_source_json(self.request, search_ch_id)
+            video_ids  = vparser.extract_video_ids(source)
             return set(video_ids)
-        except requests.exceptions.ConnectTimeout as e:
-            print('タイムアウトしました。')
-            # sessionを取得しなおす。
-            self.request = HttpRequest()
-        except requests.exceptions.RequestException as e:
-            if response.status_code == 404:
-                # TODO: アラートダイアログをポップアウトさせたい
-                print(f'{search_ch_id} は、存在しないチャンネルです。')
-            else:
-                print(f'Request Exception:{response.status_code}')
-        except Exception as e:
-            print(type(e),str(e))
-        # 例外が起きても空のsetを返して継続する。
+        except vparser.InvalidChannelIDException:
+            # チャンネルページが見つからない場合
+            # TODO: アラートダイアログをポップアウトさせたい
+            print(f'{search_ch_id} は、存在しないチャンネルです。')
+        
         return set()
 
     def load_locale_json(self): # from json file
