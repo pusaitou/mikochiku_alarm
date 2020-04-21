@@ -79,7 +79,9 @@ class MikochikuAlarm(QWidget):
         self.webbrowser_cb = QCheckBox(self.localized_text("webbrowser"), self)
         self.webbrowser_cb.toggle()
 
+        self.alarm_state = "waiting"
         self.alarm_stop = QPushButton(self.localized_text("waiting"), self)
+
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
@@ -102,7 +104,7 @@ class MikochikuAlarm(QWidget):
         for v in self.member:
             self.listWidget.addItem(v['name'])
         self.listWidget.move(30, 200)
-        self.listWidget.itemClicked.connect(self.clicked)
+        self.listWidget.itemClicked.connect(self.set_target_channel)
 
         self.show()
 
@@ -110,8 +112,7 @@ class MikochikuAlarm(QWidget):
         dialog = config_tab.ConfigTab(self)
         self.dialogs.append(dialog)
 
-    # FIXME: 関数名が抽象的すぎる
-    def clicked(self, qmode8ndex):
+    def set_target_channel(self, qmode8ndex):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
@@ -130,6 +131,7 @@ class MikochikuAlarm(QWidget):
             print(self.localized_text("started"))
             # self.alarm_stop.setEnabled(False)
             self.alarm_stop.click()
+            self.alarm_state = "stop"
             self.alarm_stop.setText(self.localized_text("stop"))
             if self.webbrowser_cb.checkState():
                 webbrowser.open(
@@ -140,6 +142,7 @@ class MikochikuAlarm(QWidget):
     def stop_alarm(self):
         pygame.mixer.music.stop()
         self.alarm_stop.setEnabled(True)
+        self.alarm_state = "waiting"
         self.alarm_stop.setText(self.localized_text("waiting"))
 
     def alarm_sound(self):
@@ -190,6 +193,15 @@ class MikochikuAlarm(QWidget):
         with open(path, encoding="UTF-8") as file:
             dict_json = json.load(file)
         return dict_json[content]
+
+    def update_ui_language(self):
+        self.setWindowTitle(self.localized_text("title"))
+        self.webbrowser_cb.setText(self.localized_text("webbrowser"))
+        self.alarm_cb.setText(self.localized_text("alarm"))
+        self.alarm_stop.setText(self.localized_text(self.alarm_state))
+
+
+
 
 
 def resource_path(relative):

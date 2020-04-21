@@ -10,6 +10,7 @@ class ConfigTab(QMainWindow):
     def __init__(self, parent=None):
         super(ConfigTab, self).__init__(parent)
         self.initUI_sub()
+        self.parent_obj = parent
 
     def initUI_sub(self):
         self.header("Language", 10)
@@ -91,15 +92,23 @@ class ConfigTab(QMainWindow):
         label.setGeometry(10, y, 40, 25)
 
     def replace_locale_json(self):
-        miko = mikochiku_alarm.MikochikuAlarm(self)
-        path = miko.lang_path + "locale.json"
+        # miko = mikochiku_alarm.MikochikuAlarm(self)
+
+        path = self.parent_obj.lang_path + "locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
-            dict_json["locale"] = self.get_locale_cmb()
-        with open(path, mode='w') as file:
-            json.dump(dict_json, file)
+            selected = self.get_locale_cmb()
+        if not selected:
+            pass
+        else:
+            dict_json["locale"] = selected
+            with open(path, mode='w') as file:
+                json.dump(dict_json, file)
+
+        self.parent_obj.update_ui_language()
 
     def get_locale_cmb(self):
         if   self.language_cmb.currentText() == "日本語" : return "ja_JP"
         elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
         elif self.language_cmb.currentText() == "English": return "en_US"
+
