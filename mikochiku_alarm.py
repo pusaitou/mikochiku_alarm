@@ -79,8 +79,9 @@ class MikochikuAlarm(QWidget):
         self.webbrowser_cb = QCheckBox(self.localized_text("webbrowser"), self)
         self.webbrowser_cb.toggle()
 
+        self.alarm_state = "waiting"
         self.alarm_stop = QPushButton(self.localized_text("waiting"), self)
-        self.alarm_state = "wait"
+
         # self.alarm_stop.setCheckable(True)
         # self.alarm_stop.setEnabled(False)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
@@ -140,8 +141,8 @@ class MikochikuAlarm(QWidget):
 
     def stop_alarm(self):
         pygame.mixer.music.stop()
-        self.alarm_state = "wait"
         self.alarm_stop.setEnabled(True)
+        self.alarm_state = "waiting"
         self.alarm_stop.setText(self.localized_text("waiting"))
 
     def alarm_sound(self):
@@ -197,11 +198,7 @@ class MikochikuAlarm(QWidget):
         self.setWindowTitle(self.localized_text("title"))
         self.webbrowser_cb.setText(self.localized_text("webbrowser"))
         self.alarm_cb.setText(self.localized_text("alarm"))
-
-        if self.alarm_state == "wait":
-            self.alarm_stop.setText(self.localized_text("waiting"))
-        else:
-            self.alarm_stop.setText(self.localized_text("stop"))
+        self.alarm_stop.setText(self.localized_text(self.alarm_state))
 
 
 
