@@ -4,11 +4,6 @@ from urllib3.util import Retry
 
 
 HEADERS = {
-    'user-agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
-                 'AppleWebKit/537.36 (KHTML, like Gecko) '
-                 'Chrome/69.0.3497.100 Safari/537.36'}
-
-HEADERS_M = {
     'user-agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) '
                  'AppleWebKit/605.1.15 (KHTML, like Gecko) '
                  'CriOS/69.0.3497.91 Mobile/15E148 Safari/605.1',
@@ -32,7 +27,5 @@ class HttpRequest:
 
     def get(self, url, params=None):
         return self.session.get(
-            url=url, params=params, headers=HEADERS_M, 
+            url=url, params=params, headers=HEADERS, 
             timeout=(20,10), stream=True)
-            
-
