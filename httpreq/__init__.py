@@ -1,4 +1,3 @@
-import brotli
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
@@ -16,7 +15,7 @@ HEADERS_M = {
     'accept': '*/*',
     'accept-language': 'en-US,en;q=0.5',
     'accept-encoding' : 'gzip, br',
-    'x-youTube-client-Name': '2',
+    'x-youTube-client-name': '2',
     'x-youTube-client-version': '2.20200410'}
 
 class HttpRequest:
@@ -32,8 +31,8 @@ class HttpRequest:
         return self.session
 
     def get(self, url, params=None):
-            return self.session.get(
-                url=url, params=params, headers=HEADERS_M, 
-                timeout=(20,10), stream=True)
+        return self.session.get(
+            url=url, params=params, headers=HEADERS_M, 
+            timeout=(20,10), stream=True)
             
 

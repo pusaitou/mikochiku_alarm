@@ -4,16 +4,12 @@ import sys
 import os
 import time
 import webbrowser
-import requests
 import pygame.mixer
 import json
 import settings
 import config_tab
 import re
 import vparser
-from urllib3.util import Retry
-from urllib3.exceptions import MaxRetryError
-from requests.adapters import HTTPAdapter
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
