@@ -102,56 +102,33 @@ def get_source_json(req:HttpRequest, channel_id):
     Query APIを叩いてライブ動画IDのリストを含むJSONデータを取り出す.
 
     戻り値:(str):動画IDのリストを含むJSON文字列。
-        リクエスト時にネットワークエラー等のエラー発生した場合は
-        エラーを表すJSONを返す。現時点ではダミーで{"error":1}
-
-        TODO: エラー種類に応じて値を切り替えて処理できるようにする。
-        またはエラー内容ごとに異なる例外を伝播させる。
+        リクエスト時にネットワークエラー等のエラーが発生した場合は
+        空の文字列 （''）を返す。
     '''
-    try:
-        url = f'https://m.youtube.com/channel/{channel_id}/videos'
-        params = {'view':2, 'flow':'list', 'pbj':1}
-        response = req.get(url=url, params=params)
-        response.raise_for_status()
-        return response.text
-    except requests.exceptions.ConnectTimeout as e:
-        print('タイムアウトしました。')
-        # sessionを取得しなおす。
-        self.request = HttpRequest()
-    except requests.exceptions.RequestException as e:
-        # NOTE: Query APIでは誤ったChannelIDを指定してもRequestExceptionは発生しない。
-        if response.status_code == 404:
-            # GUI側に404エラーを伝播させる
-            raise InvalidChannelIDException()
-        print(f'Error:{response.status_code}')
-    except Exception as e:
-        print(type(e),str(e))
-    # 例外が起きてもエラーjsonを返して継続する。
-    return json.dumps({'error':1})
-
+    url = f'https://m.youtube.com/channel/{channel_id}/videos'
+    params = {'view':2, 'flow':'list', 'pbj':1}
+    response = req.get(url=url, params=params)
+    return response.text
 
 def extract_video_ids(source_json:str):
     '''
     JSONからライブ動画のIDのリストを抽出する。
     
-    戻り値:(list):ライブ動画のIDのリスト。
+    戻り値:(List[str]):ライブ動画のIDのリスト。
         ライブ動画なし,またはJSONが不正なフォーマット/JSON取得時にエラー発生の場合
         空のリスト([])を返す。
     '''
     try:
         source_dic = json.loads(source_json)
-    except json.JSONDecodeError as e:
-        print(type(e).str(e))
+    except json.JSONDecodeError:
+        print('JSONのパースに失敗しました')
         return []
-    # チャンネルページが存在しない場合、APIはエラーJSONを吐くので例外発生させる。
+    # チャンネルページが存在しないエラーを示すJSONを
+    # 受け取った場合は例外をGUI側に伝播させる。
     if _getitem(source_dic, x_404_error) == (
         'This channel does not exist.'
     ):
         raise InvalidChannelIDException()
-    
-    if source_dic.get('error'):
-        return []
-
     return _get_live_vids(source_dic)
 
 def _get_live_vids(dic):
