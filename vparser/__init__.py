@@ -1,7 +1,7 @@
 '''
 module : vparser
 
-APIから得たJSONから、ライブ動画IDを取り出す。
+Query API経由でJSONを得て、ライブ動画IDを取り出す。
 '''
 
 import json
@@ -92,7 +92,7 @@ x_404_error = [
 
 class InvalidChannelIDException(requests.exceptions.RequestException):
     '''
-    指定したチャンネルIDのページが不存在（404）の場合に投げる例外
+    指定したチャンネルIDのページが不存在の場合に投げる例外
     '''
     pass
 
@@ -124,7 +124,7 @@ def extract_video_ids(source_json:str):
         print('JSONのパースに失敗しました')
         return []
     # チャンネルページが存在しないエラーを示すJSONを
-    # 受け取った場合は例外をGUI側に伝播させる。
+    # 受け取った場合は、例外を呼び出し側(GUI)に伝播させる。
     if _getitem(source_dic, x_404_error) == (
         'This channel does not exist.'
     ):
@@ -132,34 +132,23 @@ def extract_video_ids(source_json:str):
     return _get_live_vids(source_dic)
 
 def _get_live_vids(dic):
-    tab = _getitem(dic, p_videotab)
-    contents = _getitem(dic, p_contents)
-    
-    if contents is None:
-        # Videosタブが通常位置と異なるため探し直す
-        contents = _find_videos_tab(dic)
-    if contents is None:
-        # Videosタブが見つからなかった
-        return []     
+    contents = _getitem(dic, p_contents) or _find_videos_tab(dic) or []
 
-    return [ _getitem(c, px_vid) for c in contents
-        if _getitem(c, px_status) == 'LIVE' ]       
-
+    return [_getitem(c, px_vid) for c in contents
+        if _getitem(c, px_status) == 'LIVE']       
 
 def _find_videos_tab(dic):
     """
-    Videosタブを探す
+    通常p_contentsの位置に動画リストは存在するが、
+    位置が異なる場合は、最初からVideosタブを探す。
     """
     tabroot = _getitem(dic, p_tabroot)
     if tabroot is None:
         return 
     for tab in tabroot:
         tabtitle = _getitem(tab, sx_tabtitle)
-        if tabtitle is None:
-            continue
         if tabtitle == 'Videos':
             return _getitem(tab, sx_contents_part)
-
 
 def _getitem(dict_body, items: list):
     for item in items:
@@ -170,7 +159,7 @@ def _getitem(dict_body, items: list):
             continue
         if isinstance(item, int) and \
             isinstance(dict_body, list) and \
-            len(dict_body) > item:
+                len(dict_body) > item:
             dict_body = dict_body[item]
             continue
         return None
