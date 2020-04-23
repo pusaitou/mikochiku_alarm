@@ -24,9 +24,6 @@ else:
     from Queue import Queue
     from urllib import urlencode
 
-PATTERN_DATA = re.compile(r'window\["ytInitialData"\] = (.*?);')
-
-PATTERN_LIVE_VIDEO  = re.compile(r'LIVE_NOW.*?"videoId":"([^"]+)"')
 
 class MikochikuAlarm(QWidget):
 
