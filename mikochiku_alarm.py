@@ -72,18 +72,12 @@ class MikochikuAlarm(QWidget):
         self.alarm_cb = QCheckBox(self.localized_text("alarm"), self)
         self.alarm_cb.toggle()
 
-        # self.loop_cb = QCheckBox('アラームをループ再生する', self)
-        # self.loop_cb.move(20, 40)
-        # self.loop_cb.toggle()
-
         self.webbrowser_cb = QCheckBox(self.localized_text("webbrowser"), self)
         self.webbrowser_cb.toggle()
 
         self.alarm_state = "waiting"
         self.alarm_stop = QPushButton(self.localized_text("waiting"), self)
 
-        # self.alarm_stop.setCheckable(True)
-        # self.alarm_stop.setEnabled(False)
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
         self.config_btn = QPushButton("config", self)
@@ -129,7 +123,6 @@ class MikochikuAlarm(QWidget):
                 self.old_video_id_list.pop(0)
             print("")
             print(self.localized_text("started"))
-            # self.alarm_stop.setEnabled(False)
             self.alarm_stop.click()
             self.alarm_state = "stop"
             self.alarm_stop.setText(self.localized_text("stop"))
@@ -211,14 +204,6 @@ def resource_path(relative):
 
 
 def main():
-    # cnt = 0
-    # for line in os.popen("tasklist"):
-    #     buff = line.split()
-    #     if buff:
-    #         if buff[0] == 'mikochiku_alarm.exe':
-    #             cnt += 1
-    #             if cnt > 2:
-    #                 sys.exit()
     pygame.mixer.init()
     if os.path.exists(settings.ALARM):
         pygame.mixer.music.load(settings.ALARM)
