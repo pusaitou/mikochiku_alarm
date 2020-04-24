@@ -9,6 +9,7 @@ import pygame.mixer
 import json
 import settings
 import config_tab
+import release_notice
 import re
 from urllib3.util import Retry
 from urllib3.exceptions import MaxRetryError
@@ -34,6 +35,7 @@ HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) '
     'AppleWebKit/537.36 (KHTML, like Gecko) '
     'Chrome/69.0.3497.100 Safari/537.36'}
+
 
 class MikochikuAlarm(QWidget):
 
@@ -81,7 +83,7 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
         self.config_btn = QPushButton("config", self)
-        self.config_btn.clicked.connect(self.cfg_dialog)
+        self.config_btn.clicked.connect(self.config_dialog)
         self.dialogs = list()
 
         # setGeometry
@@ -100,11 +102,17 @@ class MikochikuAlarm(QWidget):
         self.listWidget.move(30, 200)
         self.listWidget.itemClicked.connect(self.set_target_channel)
 
+        self.notice_dialog()
+
         self.show()
 
-    def cfg_dialog(self):
-        dialog = config_tab.ConfigTab(self)
-        self.dialogs.append(dialog)
+    def config_dialog(self):
+        config = config_tab.ConfigTab(self)
+        self.dialogs.append(config)
+
+    def notice_dialog(self):
+        notice = release_notice.ReleaseNotice(self)
+        self.dialogs.append(notice)
 
     def set_target_channel(self, qmode8ndex):
         # 要素番号使うのでcurrentRow()に変更
@@ -149,7 +157,7 @@ class MikochikuAlarm(QWidget):
         response = None
         try:
             url = "https://www.youtube.com/channel/" + search_ch_id
-            response = self.session.get(url=url, 
+            response = self.session.get(url=url,
                 headers=HEADERS, timeout=(20,10), stream=True)
             response.raise_for_status()
             data = re.search(PATTERN_DATA, response.text)
@@ -192,9 +200,6 @@ class MikochikuAlarm(QWidget):
         self.webbrowser_cb.setText(self.localized_text("webbrowser"))
         self.alarm_cb.setText(self.localized_text("alarm"))
         self.alarm_stop.setText(self.localized_text(self.alarm_state))
-
-
-
 
 
 def resource_path(relative):
