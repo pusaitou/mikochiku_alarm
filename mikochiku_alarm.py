@@ -10,6 +10,7 @@ import json
 import settings
 import config_tab
 import release_notice
+import log_viewer
 import re
 from urllib3.util import Retry
 from urllib3.exceptions import MaxRetryError
@@ -102,7 +103,9 @@ class MikochikuAlarm(QWidget):
         self.listWidget.move(30, 200)
         self.listWidget.itemClicked.connect(self.set_target_channel)
 
-        self.notice_dialog()
+        # v 更新通知 / ログ出力 タブ表示用
+        # self.notice_dialog()
+        # self.log_viewer_dialog()
 
         self.show()
 
@@ -113,6 +116,10 @@ class MikochikuAlarm(QWidget):
     def notice_dialog(self):
         notice = release_notice.ReleaseNotice(self)
         self.dialogs.append(notice)
+
+    def log_viewer_dialog(self):
+        log_out = log_viewer.LogViewer(self)
+        self.dialogs.append(log_out)
 
     def set_target_channel(self, qmode8ndex):
         # 要素番号使うのでcurrentRow()に変更
