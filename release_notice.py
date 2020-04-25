@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QMainWindow
 from PyQt5.QtWidgets import QComboBox, QLabel, QFrame, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtGui  import QFont
-from PyQt5.QtCore import QRect
+from PyQt5.QtCore import QRect, Qt
 
 
 class ReleaseNotice(QMainWindow):
@@ -25,11 +25,11 @@ class ReleaseNotice(QMainWindow):
         update_link = \
             """<a href=\"https://github.com/pusaitou/mikochiku_alarm/releases\">こちら</a>"""
         label = QLabel(self)
+        label.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        label.setTextFormat(Qt.RichText)
         label.setFont(QFont("Yu Gothic", 10))
-        label.setGeometry(QRect(5, -5, 390, 70))
-        label.setText("ソフトウェアの新しいバージョンが検出されました。\n"
-                      + "現在のバージョンは" + date + "で使えなくなります。\n"
-                      + update_link + "から更新してください。")
+        label.setGeometry(QRect(5, 5, 390, 70))
+        label.setText('<center>ソフトウェアの新しいバージョンが検出されました。<br> '
+                      + "現在のバージョンは" + date + "で使えなくなります。<br>"
+                      + update_link + "から更新してください。</center>")
         label.setOpenExternalLinks(True)
-        # FIXME: 型の問題で update_link が文字列として出力される
-        # 疲れたので誰か修正お願いします、いい案が思いつかないので
