@@ -8,6 +8,7 @@ import pygame.mixer
 import json
 import settings
 import config_tab
+import release_notice
 import re
 import vparser
 from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox
@@ -23,6 +24,7 @@ if PY3:
 else:
     from Queue import Queue
     from urllib import urlencode
+
 
 
 class MikochikuAlarm(QWidget):
@@ -67,7 +69,7 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.clicked[bool].connect(self.stop_alarm)
 
         self.config_btn = QPushButton("config", self)
-        self.config_btn.clicked.connect(self.cfg_dialog)
+        self.config_btn.clicked.connect(self.config_dialog)
         self.dialogs = list()
 
         # setGeometry
@@ -86,11 +88,17 @@ class MikochikuAlarm(QWidget):
         self.listWidget.move(30, 200)
         self.listWidget.itemClicked.connect(self.set_target_channel)
 
+        self.notice_dialog()
+
         self.show()
 
-    def cfg_dialog(self):
-        dialog = config_tab.ConfigTab(self)
-        self.dialogs.append(dialog)
+    def config_dialog(self):
+        config = config_tab.ConfigTab(self)
+        self.dialogs.append(config)
+
+    def notice_dialog(self):
+        notice = release_notice.ReleaseNotice(self)
+        self.dialogs.append(notice)
 
     def set_target_channel(self, qmode8ndex):
         # 要素番号使うのでcurrentRow()に変更
@@ -162,9 +170,6 @@ class MikochikuAlarm(QWidget):
         self.webbrowser_cb.setText(self.localized_text("webbrowser"))
         self.alarm_cb.setText(self.localized_text("alarm"))
         self.alarm_stop.setText(self.localized_text(self.alarm_state))
-
-
-
 
 
 def resource_path(relative):

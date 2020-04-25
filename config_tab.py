@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QWidget, QMainWindow
 from PyQt5.QtWidgets import QComboBox, QLabel, QFrame, QLineEdit, QPushButton
 from PyQt5.QtGui     import QFont
 
+
 class ConfigTab(QMainWindow):
 
     def __init__(self, parent=None):
