@@ -36,7 +36,8 @@ class HttpRequest:
         except requests.exceptions.ConnectionError:
             # 接続切断によるsocket.gaierror等
             print('ネットワークに問題が発生しました。')
-        except requests.exceptions.ConnectTimeout:
+        except (requests.exceptions.ConnectTimeout, 
+                requests.exceptions.ReadTimeout):
             # リトライが規定回数を超えた場合
             print('接続がタイムアウトしました。')
         except requests.exceptions.HTTPError:
