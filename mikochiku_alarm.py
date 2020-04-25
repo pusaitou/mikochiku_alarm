@@ -140,7 +140,9 @@ class MikochikuAlarm(QWidget):
             # チャンネルページが見つからない場合
             # TODO: アラートダイアログをポップアウトさせたい
             print(f'{search_ch_id} は、存在しないチャンネルです。')
-        
+        except Exception as e:
+            print(e)
+            print(f'不明なエラーが発生しました')        
         return set()
 
     def load_locale_json(self): # from json file
