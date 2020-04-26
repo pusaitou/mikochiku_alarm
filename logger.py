@@ -27,7 +27,7 @@ def get_logger(modname,loglevel=logging.DEBUG):
     # create a handler for recording log file
     file_handler = logging.handlers.RotatingFileHandler(
         filename=get_logfile_path(),
-        encoding='utf-8', maxBytes=100000, backupCount=1)
+        encoding='utf-8', maxBytes=100000, backupCount=2)
     file_handler.setLevel(loglevel)
     file_handler.setFormatter(LogFormatter())
     logger.addHandler(file_handler)
