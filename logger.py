@@ -1,16 +1,15 @@
 import logging
 import logging.handlers
 import os
+import settings
 from datetime import datetime
+from pathlib import Path
 
 def get_logfile_path():
-    if   os.name == "posix": log_path = "log/"
-    elif os.name == "nt"   : log_path = ".\\log\\"
-    log_file = "test.txt"
-    filepath = log_path + log_file
-    if not os.path.exists(log_path):
-        os.makedirs(log_path)
-    return filepath
+    parent_dir = os.path.join(".", settings.LOG_DIR)
+    Path(parent_dir).mkdir(parents=True, exist_ok=True)
+    logfile_path = os.path.join(parent_dir, settings.LOG_NAME)
+    return logfile_path
 
 
 def get_logger(modname,loglevel=logging.DEBUG):
@@ -19,17 +18,16 @@ def get_logger(modname,loglevel=logging.DEBUG):
         logger.addHandler(logging.NullHandler())
         return logger
     logger.setLevel(loglevel)
-    # create handler1 for showing info
+    # create a handler for showing info
     str_handler = logging.StreamHandler()
     formatter  = LogFormatter()
     str_handler.setFormatter(formatter)
-
     str_handler.setLevel(loglevel) 
     logger.addHandler(str_handler)
-    # create handler2 for recording log file
+    # create a handler for recording log file
     file_handler = logging.handlers.RotatingFileHandler(
-        filename=get_logfile_path(), encoding='utf-8', 
-        maxBytes=100000, backupCount=0)
+        filename=get_logfile_path(),
+        encoding='utf-8', maxBytes=100000, backupCount=1)
     file_handler.setLevel(loglevel)
     file_handler.setFormatter(LogFormatter())
     logger.addHandler(file_handler)
@@ -41,9 +39,11 @@ class LogFormatter(logging.Formatter):
     def format(self, record):
         timestamp = (
             datetime.fromtimestamp(record.created)).strftime("%Y/%m/%d %H:%M:%S")
+        filename = (record.filename).ljust(15)
         module = (record.module).ljust(15)
         lineno = str(record.lineno).rjust(4)
+        level = (record.levelname).ljust(6)
         message = record.getMessage()
         
-        return '[{}]  {}  ({})  {}'.format(
-            timestamp, module, lineno, message)
+        return '{} - {} - {} :{} - {} -  {}'.format(
+            timestamp, filename, module, lineno, level, message)
