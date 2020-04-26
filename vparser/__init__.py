@@ -6,7 +6,10 @@ Query API経由でJSONを得て、ライブ動画IDを取り出す。
 
 import json
 import requests
+import logger
 from httpreq import HttpRequest
+
+log = logger.get_logger(__name__)
 
 '''
 JSONパース用のpath
@@ -121,7 +124,7 @@ def extract_video_ids(source_json:str):
     try:
         source_dic = json.loads(source_json)
     except json.JSONDecodeError:
-        print('JSONのパースに失敗しました')
+        log.error('JSONのパースに失敗しました')
         return []
     # チャンネルページが存在しないエラーを示すJSONを
     # 受け取った場合は、例外を呼び出し側(GUI)に伝播させる。
