@@ -5,10 +5,10 @@ from PyQt5.QtCore import QRect, Qt, QSize
 from urllib.request import urlopen
 import webbrowser
 
-class HoverButton(QPushButton):
+class CloseButton(QPushButton):
 
     def __init__(self, parent=None):
-        super(HoverButton, self).__init__(parent)
+        super(CloseButton, self).__init__(parent)
 
     def enterEvent(self, event):
         self.setStyleSheet(
@@ -18,10 +18,17 @@ class HoverButton(QPushButton):
         self.setStyleSheet("border-width:0px;")
 
 
-class HoverFrame(QFrame):
+class VideoItemFrame(QFrame):
             
-    def __init__(self, parent, vid, title, width, callback, opened):
-        super(HoverFrame, self).__init__(parent)
+    def __init__(self, parent, vid, callback, opened):
+        '''
+        callback : 
+            トーストをクリックしてブラウザが開いた後に実行する関数へのコールバック
+
+        opened : bool : 
+            既にブラウザが自動で開かれている場合True
+        '''
+        super(VideoItemFrame, self).__init__(parent)
         self.vid = vid
         self.callback = callback
         self.opened = opened
@@ -29,16 +36,9 @@ class HoverFrame(QFrame):
         self.setLayout(QHBoxLayout())
 
     def enterEvent(self, event):
-        print(self.opened)
-        if self.opened:
-            return
-        self.setStyleSheet(
-            "border-color:lightpink; border-style:solid; border-width:1px;")
         self.setStyleSheet(f"background-color:rgb(255,212,212);")
 
     def leaveEvent(self, event):
-        if self.opened:
-            return
         self.setStyleSheet(f"background-color: { QPalette.Background};")
 
     def mousePressEvent(self, event):
@@ -52,6 +52,13 @@ class HoverFrame(QFrame):
 class Toast(QMainWindow):
 
     def __init__(self, parent, vid, title, opened):
+        '''
+        vid , title : str : 
+            動画ID、動画タイトル
+
+        opened : bool : 
+            既にブラウザが自動で開かれている場合True
+        '''
         super(Toast, self).__init__(
             parent, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.initUI(parent, vid, title, opened)
@@ -66,17 +73,14 @@ class Toast(QMainWindow):
         self.setGeometry(d_right-width-10, d_bottom-height-10, width, height)
         self.setWindowTitle("")
 
-        # Notification text of statrting live.
+        # Notification text of starting live.
         lblNotice = QLabel(self)
         lblNotice.setFont(QFont("Yu Gothic", 12))
-        lblNotice.setGeometry(QRect(25, 10, width-25, 20))
-        lblNotice.setText(parent.localized_text("started"))
-        lblNotice.setFont(QFont("Yu Gothic", 12))
-        lblNotice.setGeometry(QRect(15, 10, width-25, 20))
+        lblNotice.setGeometry(QRect(20, 10, width-25, 20))
         lblNotice.setText(parent.localized_text("started"))
 
         # Close Button
-        btnClose = HoverButton(self)
+        btnClose = CloseButton(self)
         btnClose.setFlat(True)
         btnClose.clicked.connect(self.close)
         btnClose.setIcon(QIcon(QPixmap("close_button.png")))
@@ -84,7 +88,7 @@ class Toast(QMainWindow):
         btnClose.setGeometry(width-30-6, 6, 30, 30)
 
         # 動画情報フレーム
-        frmVideoItem= HoverFrame(self, vid, title, width, self.hide, opened)
+        frmVideoItem= VideoItemFrame(self, vid, self.hide, opened)
         frmVideoItem.setGeometry(25, 35, width-55, height-50)
 
         # 動画サムネイル
@@ -111,6 +115,7 @@ class Toast(QMainWindow):
 
     def hide(self):
         '''
-        動画フレームがクリックされ、動画ページ表示されたらすぐ閉じる。
+        QFrame（動画サムネ＋動画タイトルのbox）がクリックされ
+        動画ページがブラウザに表示されたらすぐ閉じる。
         '''
         self.close()
