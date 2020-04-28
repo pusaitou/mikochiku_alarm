@@ -1,4 +1,5 @@
 import os
+import logger
 from PyQt5.QtWidgets import QWidget, QMainWindow
 from PyQt5.QtWidgets import QComboBox, QLabel, QFrame, QLineEdit, QPushButton, QTextEdit
 from PyQt5.QtWidgets import QVBoxLayout
@@ -13,15 +14,11 @@ class LogViewer(QMainWindow):
         self.initUI_log()
 
     def initUI_log(self):
-        if   os.name == "posix": log_path = "log/"
-        elif os.name == "nt"   : log_path = ".\\log\\"
-
         log_output = QTextEdit(self)
         log_output.setReadOnly(True)
         log_output.setGeometry(5, 5, 390, 290)
 
-        log_file = "test.txt"
-        with open(log_path + log_file, encoding="UTF-8") as file:
+        with open(logger.get_logfile_path(), encoding="UTF-8") as file:
             log_output.insertPlainText(file.read())
 
         font = log_output.font()
