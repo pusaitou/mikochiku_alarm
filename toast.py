@@ -20,18 +20,18 @@ class CloseButton(QPushButton):
 
 class VideoItemFrame(QFrame):
             
-    def __init__(self, parent, vid, callback, opened):
+    def __init__(self, parent, vid, callback, should_open_browser):
         '''
         callback : 
             トーストをクリックしてブラウザが開いた後に実行する関数へのコールバック
 
-        opened : bool : 
-            既にブラウザが自動で開かれている場合True
+        should_open_browser : bool : 
+            配信ページがブラウザで開かれている場合True
         '''
         super(VideoItemFrame, self).__init__(parent)
         self.vid = vid
         self.callback = callback
-        self.opened = opened
+        self.should_open_browser = should_open_browser
         self.setFrameStyle(QFrame.NoFrame)
         self.setLayout(QHBoxLayout())
 
@@ -42,7 +42,7 @@ class VideoItemFrame(QFrame):
         self.setStyleSheet(f"background-color: { QPalette.Background};")
 
     def mousePressEvent(self, event):
-        if self.opened:
+        if self.should_open_browser:
             return
         webbrowser.open(
             "https://www.youtube.com/watch?v=" + self.vid)

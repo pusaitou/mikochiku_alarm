@@ -130,14 +130,14 @@ class MikochikuAlarm(QWidget):
             self.alarm_stop.click()
             self.alarm_state = "stop"
             self.alarm_stop.setText(self.localized_text("stop"))
-            opened = False
-            if self.webbrowser_cb.checkState():
+            should_open_browser = self.webbrowser_cb.checkState()
+            if should_open_browser:
                 webbrowser.open(
                     "https://www.youtube.com/watch?v=" + getting_video_id)
-                opened = True
             if self.alarm_cb.checkState():
                 self.alarm_sound()
-            t = toast.Toast(self, getting_video_id, buff_video_id_set[getting_video_id], opened)
+            t = toast.Toast(self, getting_video_id, 
+                buff_video_id_set[getting_video_id], should_open_browser)
             QTimer.singleShot(10000, t.close)
 
     def stop_alarm(self):
