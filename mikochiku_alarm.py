@@ -14,11 +14,11 @@ import re
 import logger
 import vparser
 import platform
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox, QMenu, QAction, QSystemTrayIcon
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 from httpreq import HttpRequest
-
+from tasktray import TrayWidget
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -96,6 +96,10 @@ class MikochikuAlarm(QWidget):
         # self.notice_dialog()
         # self.log_viewer_dialog()
 
+        # タスクトレイ周り
+        self.tray = TrayWidget(self)
+        self.tray.show()
+
         self.show()
 
     def config_dialog(self):
@@ -114,6 +118,31 @@ class MikochikuAlarm(QWidget):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
+
+    # def create_tray_actions(self):
+    #     self.quitAction = QAction(self)
+    #     self.quitAction.triggered.connect(self.quit)
+
+    # def create_tray_menu(self):
+    #     """Create menu and add items to it"""
+    #     self.trayIconMenu = QMenu(self)
+    #     self.trayIconMenu.addSeparator()
+    #     self.trayIconMenu.addAction(self.quitAction)        
+
+
+    # def create_tray_icon(self):
+    #     """Create system tray icon"""
+    #     self.trayIcon = QSystemTrayIcon(self)
+    #     self.trayIcon.setContextMenu(self.trayIconMenu)
+    #     self.trayIcon.setIcon(QIcon(settings.ICON)) 
+    #     self.trayIcon.show()
+
+    # def quit(self, force=False):
+    #     # """Quit QHangups"""
+    #     # if self.hangups_running:
+    #     print("quit()")
+
+
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
@@ -152,6 +181,7 @@ class MikochikuAlarm(QWidget):
         try:
             source = vparser.get_source_json(self.request, search_ch_id)
             video_ids  = vparser.extract_video_ids(source)
+            return set()
             return set(video_ids)
         except vparser.InvalidChannelIDException:
             # チャンネルページが見つからない場合
