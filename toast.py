@@ -136,7 +136,7 @@ class Toast(QMainWindow):
             pixmap.loadFromData(data)
             scaled = pixmap.scaledToHeight(70, Qt.SmoothTransformation)
             icon = QIcon()
-            # マウスホバー時にアイコンが青くならないように、normalとselectedに同じ画像を登録する。
+            # アイテム選択時にアイコンが青くならないように、normalとselectedに同じ画像を登録する。
             icon.addPixmap(scaled, QIcon.Normal)
             icon.addPixmap(scaled, QIcon.Selected)
             item.setIcon(icon)
