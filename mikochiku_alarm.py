@@ -117,10 +117,14 @@ class MikochikuAlarm(QWidget):
         self.search_ch_id = member['channel_id']
 
     def check_live(self):
+        videos = []
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
         for getting_video_id in buff_video_id_set.keys():
             if getting_video_id in self.old_video_id_list:
                 continue
+            videos.append(
+                {'vid': getting_video_id,
+                 'title': buff_video_id_set[getting_video_id]})
             self.old_video_id_list.append(getting_video_id)
             if len(self.old_video_id_list) > 30:
                 self.old_video_id_list.pop(0)
@@ -136,8 +140,8 @@ class MikochikuAlarm(QWidget):
                     "https://www.youtube.com/watch?v=" + getting_video_id)
             if self.alarm_cb.checkState():
                 self.alarm_sound()
-            t = toast.Toast(self, getting_video_id, 
-                buff_video_id_set[getting_video_id], should_open_browser)
+        if len(videos) > 0:
+            t = toast.Toast(self, videos, should_open_browser)
             QTimer.singleShot(10000, t.close)
 
     def stop_alarm(self):
