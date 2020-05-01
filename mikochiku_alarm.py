@@ -118,6 +118,7 @@ class MikochikuAlarm(QWidget):
 
     def check_live(self):
         videos = []
+        should_open_browser = self.webbrowser_cb.checkState()
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
         for getting_video_id in buff_video_id_set.keys():
             if getting_video_id in self.old_video_id_list:
@@ -134,7 +135,6 @@ class MikochikuAlarm(QWidget):
             self.alarm_stop.click()
             self.alarm_state = "stop"
             self.alarm_stop.setText(self.localized_text("stop"))
-            should_open_browser = self.webbrowser_cb.checkState()
             if should_open_browser:
                 webbrowser.open(
                     "https://www.youtube.com/watch?v=" + getting_video_id)
@@ -167,7 +167,7 @@ class MikochikuAlarm(QWidget):
             # TODO: アラートダイアログをポップアウトさせたい
             log.error(f'{search_ch_id} は、存在しないチャンネルです。')
         except Exception as e:
-            log.error('不明なエラーが発生しました')    
+            log.error('不明なエラーが発生しました')
             log.error(f'{type(e)}:{str(e)}')
         return {}
 
