@@ -125,7 +125,7 @@ def extract_video_ids(source_json:str):
         source_dic = json.loads(source_json)
     except json.JSONDecodeError:
         log.error('JSONのパースに失敗しました')
-        return []
+        return {}
     # チャンネルページが存在しないエラーを示すJSONを
     # 受け取った場合は、例外を呼び出し側(GUI)に伝播させる。
     if _getitem(source_dic, x_404_error) == (
@@ -135,10 +135,10 @@ def extract_video_ids(source_json:str):
     return _get_live_vids(source_dic)
 
 def _get_live_vids(dic):
-    contents = _getitem(dic, p_contents) or _find_videos_tab(dic) or []
+    contents = _getitem(dic, p_contents) or _find_videos_tab(dic) or {}
 
-    return [_getitem(c, px_vid) for c in contents
-        if _getitem(c, px_status) == 'LIVE']       
+    return {_getitem(c, px_vid):_getitem(c, px_title) 
+        for c in contents if _getitem(c, px_status) == 'LIVE'}
 
 def _find_videos_tab(dic):
     """
