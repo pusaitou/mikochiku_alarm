@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QDesktopWidget, QMainWindow, QLabel, QFrame,
     QPushButton, QListWidget, QListWidgetItem)
 from PyQt5.QtGui import QFont, QPixmap, QIcon
-from PyQt5.QtCore import QRect, Qt, QSize, QThread, QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, QSize, QThread, QObject, pyqtSignal, pyqtSlot
 from functools import partial
 from socket import timeout
 from urllib.request import urlopen, HTTPError, URLError
@@ -40,9 +40,9 @@ class LazyLoader(QObject):
 
 class VideoItem(QListWidgetItem):
 
-    def __init__(self, video):
+    def __init__(self, video, item_height):
         super(VideoItem, self).__init__()
-        self.setSizeHint(QSize(160, 80))
+        self.setSizeHint(QSize(160, item_height))
         self.vid = video["vid"]
         # 動画タイトルを先に設定する。
         self.setFont(QFont("Yu Gothic", 9))
@@ -110,8 +110,12 @@ class Toast(QMainWindow):
         self.initUI(parent)
 
     def initUI(self, parent):
+        padding = 16
+        item_height = 80
+        title_height = 40
+        list_height = min(len(self.videos), 3) * item_height
         width = 450
-        height = 140
+        height = title_height + list_height + padding
         desktop = QDesktopWidget().availableGeometry()
         d_bottom = desktop.bottom()
         d_right = desktop.right()
@@ -120,26 +124,26 @@ class Toast(QMainWindow):
         # Notification text of starting live.
         lblNotice = QLabel(self)
         lblNotice.setFont(QFont("Yu Gothic", 12))
-        lblNotice.setGeometry(QRect(20, 10, width-25, 20))
+        lblNotice.setGeometry(padding, 11, width-title_height, 20)
         lblNotice.setText(parent.localized_text("started"))
         # Close Button
         btnClose = CloseButton(self)
         btnClose.setFlat(True)
         btnClose.clicked.connect(self.close)
         btnClose.setIcon(QIcon(QPixmap("./img/close_button.png")))
-        btnClose.setIconSize(QSize(20, 20))
-        btnClose.setGeometry(width-32, 4, 30, 30)
+        btnClose.setIconSize(QSize(18, 18))
+        btnClose.setGeometry(width-title_height, 0, title_height, title_height)
         # ListBox
         listView = VideoItemList(self, self.already_open_browser)
-        listView.setGeometry(20, 40, width-55, 80)
+        listView.setGeometry(padding, title_height, width-padding*2, list_height)
         listView.itemClicked.connect(self.onItemClicked)
 
         for video in self.videos:
             # 動画情報アイテム
-            item = VideoItem(video)
+            item = VideoItem(video, item_height)
             listView.addItem(item)
             if not self.already_open_browser:
-                listView.setToolTip('Click to open.')
+                listView.setToolTip('Click to open')
         self.show()
 
     def onItemClicked(self, item: QListWidgetItem):
