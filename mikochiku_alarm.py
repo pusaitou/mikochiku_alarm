@@ -119,30 +119,6 @@ class MikochikuAlarm(QWidget):
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
 
-    # def create_tray_actions(self):
-    #     self.quitAction = QAction(self)
-    #     self.quitAction.triggered.connect(self.quit)
-
-    # def create_tray_menu(self):
-    #     """Create menu and add items to it"""
-    #     self.trayIconMenu = QMenu(self)
-    #     self.trayIconMenu.addSeparator()
-    #     self.trayIconMenu.addAction(self.quitAction)        
-
-
-    # def create_tray_icon(self):
-    #     """Create system tray icon"""
-    #     self.trayIcon = QSystemTrayIcon(self)
-    #     self.trayIcon.setContextMenu(self.trayIconMenu)
-    #     self.trayIcon.setIcon(QIcon(settings.ICON)) 
-    #     self.trayIcon.show()
-
-    # def quit(self, force=False):
-    #     # """Quit QHangups"""
-    #     # if self.hangups_running:
-    #     print("quit()")
-
-
 
     def check_live(self):
         buff_video_id_set = self.get_live_video_id(self.search_ch_id)
@@ -210,6 +186,9 @@ class MikochikuAlarm(QWidget):
         self.alarm_cb.setText(self.localized_text("alarm"))
         self.alarm_stop.setText(self.localized_text(self.alarm_state))
 
+    def changeEvent(self, event):
+        if self.windowState() & Qt.WindowMinimized:
+            self.hide()
 
 def resource_path(relative):
     if hasattr(sys, '_MEIPASS'):
