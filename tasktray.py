@@ -14,10 +14,7 @@ class TrayWidget(QSystemTrayIcon):
         self.create_icon()
 
     def create_actions(self):
-        # Action - Quit app
-        self.quitAction = QAction(self)
-        self.quitAction.setText(self.tr("&Quit"))
-        self.quitAction.triggered.connect(self.quit)
+
         # Acton - Show main widget (menu and double click the tray icon)
         self.showMainWidgetAction = QAction(self)
         self.showMainWidgetAction.setText(self.tr("Show &Main Widget"))
@@ -29,13 +26,17 @@ class TrayWidget(QSystemTrayIcon):
         self.showConfigAction.triggered.connect(self.showConfig)
         # Trigger event when tasktray icon double clicked
         self.activated.connect(self.iconActivated)
+        # Action - Quit app
+        self.quitAction = QAction(self)
+        self.quitAction.setText(self.tr("&Quit"))
+        self.quitAction.triggered.connect(self.quit)
 
     def create_menu(self):
         self.trayIconMenu = QMenu(self.parent)
         self.trayIconMenu.addSeparator()
-        self.trayIconMenu.addAction(self.quitAction)
         self.trayIconMenu.addAction(self.showMainWidgetAction)
         self.trayIconMenu.addAction(self.showConfigAction)
+        self.trayIconMenu.addAction(self.quitAction)
 
     def create_icon(self):
         self.setContextMenu(self.trayIconMenu)
