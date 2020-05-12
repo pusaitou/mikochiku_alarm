@@ -145,3 +145,5 @@ cython_debug/
 
 # Log Files
 log/
+
+dist/config/

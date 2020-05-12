@@ -17,7 +17,7 @@ class CloseButton(QPushButton):
 
     def __init__(self, parent=None):
         super(CloseButton, self).__init__(parent)
-        self.setStyleSheet(open('./css/toast_button.css', encoding='utf-8').read())
+        self.setStyleSheet(open('./res/css/toast_button.css', encoding='utf-8').read())
 
 
 class LazyLoader(QObject):
@@ -58,7 +58,7 @@ class VideoItem(QListWidgetItem):
             pass
         # 読み込みが遅かった場合（0.5秒以上）ここに飛ぶ。
         # 読み込み中のプレースホルダ設定
-        self.setIcon(QIcon(QPixmap("./img/place_holder.bmp")))
+        self.setIcon(QIcon(QPixmap("./res/img/place_holder.bmp")))
         # バックグラウンドで画像読み込みを開始
         self.thread = QThread()
         self.loader = LazyLoader()
@@ -88,9 +88,9 @@ class VideoItemList(QListWidget):
         self.setWordWrap(True)
         self.setFocusPolicy(Qt.NoFocus)
         if already_open_browser:
-            self.setStyleSheet(open('./css/toast_normal.css', encoding='utf-8').read())
+            self.setStyleSheet(open('./res/css/toast_normal.css', encoding='utf-8').read())
         else:
-            self.setStyleSheet(open('./css/toast_hover.css', encoding='utf-8').read())
+            self.setStyleSheet(open('./res/css/toast_hover.css', encoding='utf-8').read())
 
 
 class Toast(QMainWindow):
@@ -126,7 +126,7 @@ class Toast(QMainWindow):
         btnClose = CloseButton(self)
         btnClose.setFlat(True)
         btnClose.clicked.connect(self.close)
-        btnClose.setIcon(QIcon(QPixmap("./img/close_button.png")))
+        btnClose.setIcon(QIcon(QPixmap("./res/img/close_button.png")))
         btnClose.setIconSize(QSize(20, 20))
         btnClose.setGeometry(width-32, 4, 30, 30)
         # ListBox

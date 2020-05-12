@@ -35,14 +35,11 @@ class ConfigTab(QMainWindow):
         self.language_cmb.setGeometry(10, 40, 200,25)
 
     def channel_cmb(self):
-        if   os.name == "posix": self.ch_path = "channel/"
-        elif os.name == "nt"   : self.ch_path = ".\\channel\\"
-
-        with open(self.ch_path + "nijisanji.json", encoding="UTF-8") as file:
+        with open("./res/channel/nijisanji.json", encoding="UTF-8") as file:
             self.nijisanji = json.load(file)
-        with open(self.ch_path + "hololive.json" , encoding="UTF-8") as file:
+        with open("./res/channel/hololive.json" , encoding="UTF-8") as file:
             self.hololive  = json.load(file)
-        with open(self.ch_path + "other_ch.json" , encoding="UTF-8") as file:
+        with open("./res/channel/other_ch.json" , encoding="UTF-8") as file:
             self.other_ch  = json.load(file)
 
         self.nijisanji_cmb = QComboBox(self)
@@ -95,7 +92,7 @@ class ConfigTab(QMainWindow):
     def replace_locale_json(self):
         # miko = mikochiku_alarm.MikochikuAlarm(self)
 
-        path = self.parent_obj.lang_path + "locale.json"
+        path = "./res/lang/locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             selected = self.get_locale_cmb()
