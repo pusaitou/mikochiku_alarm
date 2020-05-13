@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['config.spec'],
+a = Analysis(['mikochiku_alarm.py'],
              pathex=['V:\\VDoc\\saitoupu\\fork_mikoalarm'],
              binaries=[],
              datas=[],
