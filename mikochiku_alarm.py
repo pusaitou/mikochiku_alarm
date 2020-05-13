@@ -200,10 +200,9 @@ def main():
     log.info("---App start---")
     log.debug(f"platform: {sys.platform} / python ver: {platform.python_version()}")
     pygame.mixer.init()
-    if os.path.exists(settings.ALARM):
-        pygame.mixer.music.load(settings.ALARM)
-    else:
-        pygame.mixer.music.load(resource_path(settings.ALARM))
+    alarm_path = "./res/alarm.py"
+    if os.path.exists(alarm_path):
+        pygame.mixer.music.load(alarm_path)
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(resource_path(settings.ICON)))
     mk = MikochikuAlarm()

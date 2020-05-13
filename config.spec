@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['mikochiku_alarm.py'],
-             pathex=['V:\\VDoc\\saitoupu\\fork_mikoalarm'],
+             pathex=[],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -15,23 +15,24 @@ a = Analysis(['mikochiku_alarm.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+a.datas += [('libmpg123.dll','libmpg123.dll','DATA')]
+a.datas += [('icon.ico','icon.ico','DATA')]
+
 exe = EXE(pyz,
           a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
           [],
-          exclude_binaries=True,
-          name='config',
+          name='mikochiku_alarm',
           debug=True,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True )
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='config')
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=True,icon="icon.ico" )
