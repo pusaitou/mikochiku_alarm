@@ -14,10 +14,11 @@ import re
 import logger
 import vparser
 import platform
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox
+from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox, QMenu, QAction, QSystemTrayIcon
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 from httpreq import HttpRequest
+from tasktray import TrayWidget
 import toast
 
 
@@ -97,6 +98,10 @@ class MikochikuAlarm(QWidget):
         # self.notice_dialog()
         # self.log_viewer_dialog()
 
+        # タスクトレイ周り
+        self.tray = TrayWidget(self)
+        self.tray.show()
+
         self.show()
 
     def config_dialog(self):
@@ -115,6 +120,7 @@ class MikochikuAlarm(QWidget):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
+
 
     def check_live(self):
         videos = []
@@ -189,6 +195,9 @@ class MikochikuAlarm(QWidget):
         self.alarm_cb.setText(self.localized_text("alarm"))
         self.alarm_stop.setText(self.localized_text(self.alarm_state))
 
+    def changeEvent(self, event):
+        if self.windowState() & Qt.WindowMinimized:
+            self.hide()
 
 def resource_path(relative):
     if hasattr(sys, '_MEIPASS'):

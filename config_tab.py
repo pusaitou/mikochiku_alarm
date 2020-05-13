@@ -2,9 +2,10 @@ import os
 import json
 import mikochiku_alarm
 from PyQt5.QtWidgets import QWidget, QMainWindow
-from PyQt5.QtWidgets import QComboBox, QLabel, QFrame, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QComboBox, QLabel, QFrame, QLineEdit, QPushButton, QCheckBox
 from PyQt5.QtGui     import QFont
-
+from PyQt5.QtCore import Qt
+import settings
 
 class ConfigTab(QMainWindow):
 
@@ -23,7 +24,9 @@ class ConfigTab(QMainWindow):
         self.header("Add channel", 210)
         self.channel_adder()
 
-        self.setGeometry(580, 300, 220, 335)
+        self.toggle_tasktray(335)
+
+        self.setGeometry(580, 300, 220, 370)
         self.setWindowTitle("Config")
         self.show()
 
@@ -113,3 +116,9 @@ class ConfigTab(QMainWindow):
         elif self.language_cmb.currentText() == "中文"   : return "zh_CN"
         elif self.language_cmb.currentText() == "English": return "en_US"
 
+    def toggle_tasktray(self, y):
+        cb = QCheckBox(self)
+        cb.setFont(QFont("Yu Gothic", 9))
+        cb.setText("Store in the task tray")
+        cb.setCheckState(Qt.Checked)
+        cb.setGeometry(10, y, 200, 25)
