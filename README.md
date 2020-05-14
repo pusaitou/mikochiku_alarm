@@ -5,7 +5,7 @@
 
 + All raw resource files are stored in the 'res' directory.
 
-+ Do not use the `resource_path()` function as much as possible. Only static (no need to change) resource file (e.g. icon.ico).
++ In this repo, I do not use the "resource_path()" function as much as possible. Only static (no need to change) resource file (e.g. icon.ico).
 
 ### Pros : 
 + Code maintenance becomes easy: 
@@ -29,9 +29,9 @@ a = Analysis(['mikochiku_alarm.py'], datas=[] ... )
 a.datas += [('icon.ico','icon.ico','DATA')]
 ```
 
-+ The files described in the `config.spec` are embedded in the executable file and expanded to the temporary directory (`%temp%/___MEIxxxxxx`) at runtime.
++ The files described in the config.spec are embedded in the executable file and expanded to the temporary directory (%temp%/___MEIxxxxxx) at runtime.
 
-+ In order for the executable file to correctly access `%temp%/___MEIxxxxxx` at runtime, you need to redirect the file access using the `resource_path()` function in the main script.
++ In order for the executable file to correctly access %temp%/___MEIxxxxxx at runtime, you need to redirect the file access using the resource_path() function in the main script.
 
 ```python
 def resource_path(relative):
@@ -47,7 +47,7 @@ app.setWindowIcon(QIcon(resource_path(settings.ICON)))
 
 ### .env File
 
-+ When you use `dotenv`, you need to put the .env file in the same place as the executable or parent directory of the executable.
++ When you use `.env`, you need to put the .env file in the same place as the executable or parent directory of the executable.
 
 If the .env file is not in the same place (or parent directory), the following error will occur internally and the program will be forced to close.
 
@@ -61,8 +61,8 @@ TypeError: join() argument must be str, bytes, or os.PathLike object, not 'NoneT
 ```
 
 +  <b>env does not have the ability to redirect to a resource file.</b>
-+ + Therefore, as a rule, resource files embedded with config.spec should be redirected appropriately using the `resource_path()` function.
-+ + The exception is that: the dll files used by python libraries are implicitly called from `%temp%/___MEIxxxxxx`, so there is no need to consider redirection on the main script as long as it is specified in config,spec.
++ + Therefore, as a rule, resource files embedded with config.spec should be redirected appropriately using the resource_path() function.
++ + The exception is that: the dll files used by python libraries are implicitly called from "%temp%/___MEIxxxxxx", so there is no need to consider redirection on the main script as long as it is specified in config.spec.
 ```python
 # config.spec
 a = Analysis(['mikochiku_alarm.py'], datas=[] ... )
@@ -73,6 +73,6 @@ a.datas += [('libmpg123.dll','libmpg123.dll','DATA')]
 
 
 ### The significance of using .env
-+ Currently, .env is used for the abstraction of resource file paths. Even if the location of the resource file changes, there is no need to rewrite the main script.
++ Currently, .env is being used for the abstraction of resource file paths. Even if the location of the resource file changes, there is no need to rewrite the main script.
 + The demerit of .env is that it is difficult to rewrite from the application side.
  
