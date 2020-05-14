@@ -200,7 +200,7 @@ def main():
     log.info("---App start---")
     log.debug(f"platform: {sys.platform} / python ver: {platform.python_version()}")
     pygame.mixer.init()
-    alarm_path = "./res/alarm.py"
+    alarm_path = "./res/alarm.mp3"
     if os.path.exists(alarm_path):
         pygame.mixer.music.load(alarm_path)
     app = QApplication(sys.argv)
