@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
+import os
+import sys
 import settings
-from mikochiku_alarm import resource_path
 
 
 class TrayWidget(QSystemTrayIcon):
@@ -58,3 +59,9 @@ class TrayWidget(QSystemTrayIcon):
     def iconActivated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.showMainWidget()
+
+
+def resource_path(relative):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
