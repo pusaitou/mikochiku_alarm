@@ -178,7 +178,7 @@ class MikochikuAlarm(QWidget):
         return {}
 
     def load_locale_json(self): # from json file
-        path = "./res/lang/" +"locale.json"
+        path = "./res/lang/locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             return dict_json["locale"]
