@@ -1,12 +1,7 @@
 QPushButton {
-    border-color: rgba(255, 100, 100, 0);
-    border-style: solid;
-    border-width: 1px;
+    border: 1px solid transparent;
 }
 
 QPushButton:hover {
-    border-color: rgb(255, 100, 100);
-    border-style: solid;
-    border-width: 1px;
+    background: rgb(255, 212, 212);
 }
-
