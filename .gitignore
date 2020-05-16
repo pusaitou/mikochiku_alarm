@@ -145,3 +145,7 @@ cython_debug/
 
 # Log Files
 log/
+
+dist/config/
+dist/mokochiku_alarm
+dist/mokochiku_alarm.exe

@@ -4,10 +4,10 @@ block_cipher = None
 
 
 a = Analysis(['mikochiku_alarm.py'],
-             pathex=['.\\'],
+             pathex=[],
              binaries=[],
              datas=[],
-             hiddenimports=[],
+             hiddenimports=["pkg_resources.py2_warn"],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -15,12 +15,12 @@ a = Analysis(['mikochiku_alarm.py'],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
-a.datas += [('icon.ico', '.\\icon.ico', 'DATA')]
-a.datas += [('alarm.mp3', '.\\alarm.mp3', 'DATA')]
-a.datas += [('lang', '.\\lang', 'DATA')]
+a.datas += [('libmpg123.dll','libmpg123.dll','DATA')]
+a.datas += [('icon.ico','icon.ico','DATA')]
 
 exe = EXE(pyz,
           a.scripts,

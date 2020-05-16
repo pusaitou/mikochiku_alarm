@@ -1,0 +1,12 @@
+QPushButton {
+    border-color: rgba(255, 100, 100, 0);
+    border-style: solid;
+    border-width: 1px;
+}
+
+QPushButton:hover {
+    border-color: rgb(255, 100, 100);
+    border-style: solid;
+    border-width: 1px;
+}
+

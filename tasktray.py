@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
+import os
+import sys
 import settings
 
 
@@ -14,7 +16,6 @@ class TrayWidget(QSystemTrayIcon):
         self.create_icon()
 
     def create_actions(self):
-
         # Acton - Show main widget (menu and double click the tray icon)
         self.showMainWidgetAction = QAction(self)
         self.showMainWidgetAction.setText("Show &Main Widget")
@@ -40,7 +41,7 @@ class TrayWidget(QSystemTrayIcon):
 
     def create_icon(self):
         self.setContextMenu(self.trayIconMenu)
-        self.setIcon(QtGui.QIcon(settings.ICON))
+        self.setIcon(QtGui.QIcon(resource_path(settings.ICON)))
 
     def quit(self, force=False):
         self.parent.close()
@@ -58,3 +59,9 @@ class TrayWidget(QSystemTrayIcon):
     def iconActivated(self, reason):
         if reason == QSystemTrayIcon.DoubleClick:
             self.showMainWidget()
+
+
+def resource_path(relative):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)

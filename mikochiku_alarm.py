@@ -41,11 +41,11 @@ class MikochikuAlarm(QWidget):
         self.old_video_id_list = []
         self.request = HttpRequest()
         # メンバー一覧のjsonを取得し、memberに格納
-        with open(".\\channel\\hololive.json", encoding="UTF-8") as file:
+        with open("./res/channel/hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
         # Checks which os is being used then sets the correct path
-        if   os.name == "posix": self.lang_path = "lang/"
-        elif os.name == "nt"   : self.lang_path = ".\\lang\\"
+        # if   os.name == "posix": self.lang_path = "lang/"
+        # elif os.name == "nt"   : self.lang_path = ".\\lang\\"
 
         self.initUI()
         # 起動直後にチャンネルIDを調べる
@@ -178,13 +178,13 @@ class MikochikuAlarm(QWidget):
         return {}
 
     def load_locale_json(self): # from json file
-        path = self.lang_path +"locale.json"
+        path = "./res/lang/locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
             return dict_json["locale"]
 
     def localized_text(self, content):
-        path = self.lang_path + self.load_locale_json() + ".json"
+        path = "./res/lang/" + self.load_locale_json() + ".json"
         with open(path, encoding="UTF-8") as file:
             dict_json = json.load(file)
         return dict_json[content]
@@ -209,10 +209,9 @@ def main():
     log.info("---App start---")
     log.debug(f"platform: {sys.platform} / python ver: {platform.python_version()}")
     pygame.mixer.init()
-    if os.path.exists(settings.ALARM):
-        pygame.mixer.music.load(settings.ALARM)
-    else:
-        pygame.mixer.music.load(resource_path(settings.ALARM))
+    alarm_path = "./res/alarm.mp3"
+    if os.path.exists(alarm_path):
+        pygame.mixer.music.load(alarm_path)
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(resource_path(settings.ICON)))
     mk = MikochikuAlarm()
