@@ -5,7 +5,7 @@ name: Python application
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
  
@@ -19,11 +19,6 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.8
-    - name: Ready resource files
-      run: |
-        rmdir /s /q dist\res
-        echo d | xcopy /e res dist\res
-      shell: cmd
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
