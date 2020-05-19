@@ -1,8 +1,0 @@
-{
-    "title"     : "Miko畜小闹钟",
-    "alarm"     : "直播开始时响铃",
-    "webbrowser": "直播开始时自动打开浏览器",
-    "started"   : "正在直播",
-    "waiting"   : "直播未开始",
-    "stop"      : "停止"
-}

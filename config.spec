@@ -1,9 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-from distutils.dir_util import copy_tree
-
 block_cipher = None
-
-copy_tree("./res", "./dist/res")
 
 a = Analysis(['mikochiku_alarm.py'],
              pathex=[],
