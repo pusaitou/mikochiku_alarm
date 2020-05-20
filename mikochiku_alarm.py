@@ -218,7 +218,6 @@ def main():
     # 二重起動チェック
     if app.isRunning():
         msg = QMessageBox(icon=icon)
-        msg = QMessageBox()
         msg.setWindowTitle("Caution!")
         msg.setText("mikochiku_alarmは既に起動中です。")
         msg.exec_()
