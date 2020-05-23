@@ -2,7 +2,6 @@
 
 import sys
 import os
-import time
 import webbrowser
 import pygame.mixer
 import json
@@ -10,17 +9,18 @@ import settings
 import config_tab
 import release_notice
 import log_viewer
-import re
 import logger
 import vparser
 import platform
-from PyQt5.QtWidgets import QWidget, QCheckBox, QPushButton, QApplication, QLabel, QListWidget, QMessageBox, QMenu, QAction, QSystemTrayIcon
+from PyQt5.QtWidgets import (
+    QWidget, QCheckBox, QPushButton, 
+    QLabel, QListWidget, QMessageBox)
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QTimer
 from httpreq import HttpRequest
 from tasktray import TrayWidget
 import toast
-
+from singleapp import QtSingleApplication
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -33,6 +33,7 @@ else:
 
 log = logger.get_logger(__name__)
 
+
 class MikochikuAlarm(QWidget):
 
     def __init__(self, parent=None):
@@ -43,14 +44,9 @@ class MikochikuAlarm(QWidget):
         # メンバー一覧のjsonを取得し、memberに格納
         with open("./res/channel/hololive.json", encoding="UTF-8") as file:
             self.member = json.load(file)
-        # Checks which os is being used then sets the correct path
-        # if   os.name == "posix": self.lang_path = "lang/"
-        # elif os.name == "nt"   : self.lang_path = ".\\lang\\"
-
         self.initUI()
         # 起動直後にチャンネルIDを調べる
         self.check_live()
-
 
     def initUI(self):
 
@@ -84,7 +80,10 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop   .setGeometry( 80,  80,  80, 25)
         self.config_btn   .setGeometry(195, 120,  60, 25)
 
-        self.setGeometry(300, 300, 260, 150)
+        main_width = 260
+        main_height = 150
+        self.setGeometry(300, 300, main_width, main_height)
+        self.setFixedSize(main_width, main_height)
         self.setWindowTitle(self.localized_text("title"))
 
         # メンバー名をlistWidgetに格納
@@ -120,7 +119,6 @@ class MikochikuAlarm(QWidget):
         # 要素番号使うのでcurrentRow()に変更
         member = self.member[self.listWidget.currentRow()]
         self.search_ch_id = member['channel_id']
-
 
     def check_live(self):
         videos = []
@@ -199,6 +197,7 @@ class MikochikuAlarm(QWidget):
         if self.windowState() & Qt.WindowMinimized:
             self.hide()
 
+
 def resource_path(relative):
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative)
@@ -212,10 +211,21 @@ def main():
     alarm_path = "./res/alarm.mp3"
     if os.path.exists(alarm_path):
         pygame.mixer.music.load(alarm_path)
-    app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(resource_path(settings.ICON)))
-    mk = MikochikuAlarm()
-    sys.exit(app.exec_())
+    # 同じ場所からの二重起動を防ぐ
+    appGuid = os.getcwd()
+    app = QtSingleApplication(appGuid, sys.argv)
+    icon = QIcon(resource_path(settings.ICON))
+    # 二重起動チェック
+    if app.isRunning():
+        msg = QMessageBox(icon=icon)
+        msg.setWindowTitle("Caution!")
+        msg.setText("mikochiku_alarmは既に起動中です。")
+        msg.exec_()
+    # 通常起動
+    else:
+        app.setWindowIcon(icon)
+        mk = MikochikuAlarm()
+        sys.exit(app.exec_())
 
 
 if __name__ == '__main__':

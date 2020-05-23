@@ -1,8 +1,0 @@
-{
-    "title"     : "Mikochiku Alarm",
-    "alarm"     : "Play alarm when livestream starts",
-    "webbrowser": "Open livestream in webrowser",
-    "started"   : "livestream started!",
-    "waiting"   : "Waiting",
-    "stop"      : "stop"
-}
