@@ -12,11 +12,10 @@ import log_viewer
 import logger
 import vparser
 import platform
-from PyQt5.QtWidgets import (
-    QWidget, QCheckBox, QPushButton, 
-    QLabel, QListWidget, QMessageBox)
-from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import (QWidget, QCheckBox, QPushButton,
+                             QLabel, QListWidget, QMessageBox)
+from PyQt5.QtGui import QIcon, QPixmap, QCloseEvent
+from PyQt5.QtCore import Qt, QTimer, QCoreApplication
 from httpreq import HttpRequest
 from tasktray import TrayWidget
 import toast
@@ -175,7 +174,7 @@ class MikochikuAlarm(QWidget):
             log.error(f'{type(e)}:{str(e)}')
         return {}
 
-    def load_locale_json(self): # from json file
+    def load_locale_json(self):  # from json file
         path = "./res/lang/locale.json"
         with open(path, mode='r') as file:
             dict_json = json.load(file)
@@ -194,8 +193,17 @@ class MikochikuAlarm(QWidget):
         self.alarm_stop.setText(self.localized_text(self.alarm_state))
 
     def changeEvent(self, event):
+        # メインウィジェットの最小化ボタンを押したら非表示にする。
         if self.windowState() & Qt.WindowMinimized:
+            # TODO: config内の「最小化時にタスクトレイの格納」にチェックが入っているか否かの
+            # 判定をここで行う。チェックが入っている場合はhide()を実行。
             self.hide()
+
+    def closeEvent(self, event: QCloseEvent):
+        # main()にてapp.setQuitOnLastWindowClosed(False)を設定しているため
+        # そのままだとcloseEventがスルーされXボタンを押しても終了できない。
+        # この関数でcloseEventを捕捉して終了させる。
+        QCoreApplication.quit()
 
 
 def resource_path(relative):
@@ -214,6 +222,8 @@ def main():
     # 同じ場所からの二重起動を防ぐ
     appGuid = os.getcwd()
     app = QtSingleApplication(appGuid, sys.argv)
+    # トレイ格納時に強制終了するのを防ぐためsetQuitOnLastWindowClosed(False)を設定。
+    app.setQuitOnLastWindowClosed(False)
     icon = QIcon(resource_path(settings.ICON))
     # 二重起動チェック
     if app.isRunning():
