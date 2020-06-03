@@ -144,7 +144,7 @@ def _get_live_vids(dic):
     contents = _getitem(dic, p_contents) or _find_videos_tab(dic) or {}
 
     return {_getitem(c, px_vid): _getitem(c, px_title)
-            for c in contents if _getitem(c, px_status) == 'LIVE'}
+        for c in contents if _getitem(c, px_status) == 'LIVE'}
 
 
 def _find_videos_tab(dic):
