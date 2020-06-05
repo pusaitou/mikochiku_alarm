@@ -32,8 +32,10 @@ sx_contents_part = [
     'sectionListRenderer',
     'contents',
     0,
-    'itemSectionRenderer',
-    'contents'
+    'shelfRenderer',
+    'content',
+    'verticalListRenderer',
+    'items'
 ]
 
 p_videotab = [
@@ -57,8 +59,10 @@ p_contents = [
     'sectionListRenderer',
     'contents',
     0,
-    'itemSectionRenderer',
-    'contents'
+    'shelfRenderer',
+    'content',
+    'verticalListRenderer',
+    'items'
 ]
 
 px_vid = [
@@ -100,7 +104,7 @@ class InvalidChannelIDException(requests.exceptions.RequestException):
     pass
 
 
-def get_source_json(req:HttpRequest, channel_id):
+def get_source_json(req: HttpRequest, channel_id):
     '''
     Query APIを叩いてライブ動画IDのリストを含むJSONデータを取り出す.
 
@@ -109,14 +113,15 @@ def get_source_json(req:HttpRequest, channel_id):
         空の文字列 （''）を返す。
     '''
     url = f'https://m.youtube.com/channel/{channel_id}/videos'
-    params = {'view':2, 'flow':'list', 'pbj':1}
+    params = {'view': 57, 'flow': 'list', 'pbj': 1}
     response = req.get(url=url, params=params)
     return response.text
 
-def extract_video_ids(source_json:str):
+
+def extract_video_ids(source_json: str):
     '''
     JSONからライブ動画のIDのリストを抽出する。
-    
+
     戻り値:(List[str]):ライブ動画のIDのリスト。
         ライブ動画なし,またはJSONが不正なフォーマット/JSON取得時にエラー発生の場合
         空のリスト([])を返す。
@@ -134,11 +139,13 @@ def extract_video_ids(source_json:str):
         raise InvalidChannelIDException()
     return _get_live_vids(source_dic)
 
+
 def _get_live_vids(dic):
     contents = _getitem(dic, p_contents) or _find_videos_tab(dic) or {}
 
-    return {_getitem(c, px_vid):_getitem(c, px_title) 
+    return {_getitem(c, px_vid): _getitem(c, px_title)
         for c in contents if _getitem(c, px_status) == 'LIVE'}
+
 
 def _find_videos_tab(dic):
     """
@@ -147,11 +154,12 @@ def _find_videos_tab(dic):
     """
     tabroot = _getitem(dic, p_tabroot)
     if tabroot is None:
-        return 
+        return
     for tab in tabroot:
         tabtitle = _getitem(tab, sx_tabtitle)
         if tabtitle == 'Videos':
             return _getitem(tab, sx_contents_part)
+
 
 def _getitem(dict_body, items: list):
     for item in items:
