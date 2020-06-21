@@ -20,8 +20,6 @@ class LogViewer(QMainWindow):
 
         with open(logger.get_logfile_path(), encoding="UTF-8") as file:
             log_output.insertPlainText(file.read())
-        with open(logger.get_logfile_path() + ".1", encoding="UTF-8") as file:
-            log_output.insertPlainText(file.read())
 
         font = log_output.font()
         font.setFamily("Yu Gothic")

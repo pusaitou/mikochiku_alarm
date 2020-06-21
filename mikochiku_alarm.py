@@ -46,6 +46,8 @@ class MikochikuAlarm(QWidget):
         self.initUI()
         # 起動直後にチャンネルIDを調べる
         self.check_live()
+        # 古いログファイルを削除しログファイルの数を一定個数以下にする。（既定値：5個）
+        logger.remove_old_log()
 
     def initUI(self):
 
@@ -132,7 +134,7 @@ class MikochikuAlarm(QWidget):
             self.old_video_id_list.append(getting_video_id)
             if len(self.old_video_id_list) > 30:
                 self.old_video_id_list.pop(0)
-            log.info(self.localized_text("started"))
+            log.info(''.join([self.localized_text("started"), ' -[', getting_video_id, '] ', buff_video_id_set[getting_video_id]]))
             log.debug(f"buff_video_id_set: {[id for id in buff_video_id_set.keys()]}")
             log.debug(f"self.old_video_id_list {self.old_video_id_list}")
             self.alarm_stop.click()
