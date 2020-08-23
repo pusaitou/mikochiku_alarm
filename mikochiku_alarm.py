@@ -164,6 +164,7 @@ class MikochikuAlarm(QWidget):
 
     def get_live_video_id(self, search_ch_id):
         try:
+            self.request = HttpRequest()
             source = vparser.get_source_json(self.request, search_ch_id)
             video_ids = vparser.extract_video_ids(source)
             return video_ids
